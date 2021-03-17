@@ -1,7 +1,9 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-
 #include <stdio.h>
+#include <iostream>
+
+#include "shader.hpp"
 
 namespace
 {
@@ -20,7 +22,7 @@ namespace
         }
 
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
@@ -57,13 +59,24 @@ int main(int argc, char *argv[])
         return 0;
     }
 
+    std::string vertex_shader_path = "../shader/vertex.vert";
+    std::string fragment_shader_path = "../shader/fragment.frag";
+    Shader shader(vertex_shader_path, fragment_shader_path);
+    std::cout << "program: " << shader.getProgram() << std::endl;
+
+    GLuint vertex_array_object;
+    glCreateVertexArrays(1, &vertex_array_object);
+    glBindVertexArray(vertex_array_object);
+    
     // Set the clear color to a nice green
-    glClearColor(0.15f, 0.6f, 0.4f, 1.0f);
+    glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
 
     while (!glfwWindowShouldClose(window))
     {
         glClear(GL_COLOR_BUFFER_BIT);
-
+        glUseProgram(shader.getProgram());
+        glDrawArrays(GL_POINTS, 0, 1);
+        glPointSize(40.0f);
         glfwSwapBuffers(window);
         glfwPollEvents();
     }

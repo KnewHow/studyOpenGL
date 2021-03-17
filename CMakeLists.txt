@@ -6,6 +6,11 @@ set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib")
 set(SOURCES "${SRC_DIR}/main.cpp")
 
+file(GLOB SOURCES
+    "${SRC_DIR}/*.h"
+    "${SRC_DIR}/*.cpp"
+)
+
 
 # Executable definition and properties
 add_executable(${PROJECT_NAME} ${SOURCES})
