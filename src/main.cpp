@@ -1,4 +1,5 @@
 #include <GLFW/glfw3.h>
+#include <cmath>
 
 int main(void)
 {
@@ -20,10 +21,20 @@ int main(void)
     glfwMakeContextCurrent(window);
 
     /* Loop until the user closes the window */
+    int cnt = 0;
     while (!glfwWindowShouldClose(window))
     {
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
+
+        const float color[] = {(float)std::sin(cnt) * 0.5f + 0.5f,
+                                (float)std::cos(cnt) * 0.5f + 0.5f,
+                                 0.0f,
+                                 1.0f
+                                };
+        glClearColor(color[0], color[1], color[2], color[3]);
+
+        cnt++;
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
