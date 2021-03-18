@@ -26,7 +26,7 @@ namespace
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
-        GLFWwindow *window = glfwCreateWindow(1280, 720, "InitGL", nullptr, nullptr);
+        GLFWwindow *window = glfwCreateWindow(1366, 768, "StudyOpenGL", nullptr, nullptr);
         if (!window)
         {
             fprintf(stderr, "Unable to create GLFW window\n");
@@ -73,10 +73,11 @@ int main(int argc, char *argv[])
 
     while (!glfwWindowShouldClose(window))
     {
-        glClear(GL_COLOR_BUFFER_BIT);
+        const GLfloat color[] = {0.0f, 0.2f, 0.0f, 1.0f};
+        glClearBufferfv(GL_COLOR, 0, color);
         glUseProgram(shader.getProgram());
-        glDrawArrays(GL_POINTS, 0, 1);
-        glPointSize(40.0f);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        //glPointSize(40.0f);
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
