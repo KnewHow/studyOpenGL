@@ -59,25 +59,25 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    std::string vertex_shader_path = "../shader/vertex.vert";
-    std::string fragment_shader_path = "../shader/fragment.frag";
-    Shader shader(vertex_shader_path, fragment_shader_path);
+    std::string vertex_shader_path = "../shader/vertex.glsl";
+    std::string fragment_shader_path = "../shader/fragment.glsl";
+    std::string tess_control_path = "../shader/tess_control.glsl";
+    std::string tess_evaluation = "../shader/tess_evaluation.glsl";
+    Shader shader(vertex_shader_path, fragment_shader_path, tess_control_path, tess_evaluation);
     std::cout << "program: " << shader.getProgram() << std::endl;
 
     GLuint vertex_array_object;
     glCreateVertexArrays(1, &vertex_array_object);
     glBindVertexArray(vertex_array_object);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     
-    // Set the clear color to a nice green
-    glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
-
     while (!glfwWindowShouldClose(window))
     {
         const GLfloat color[] = {0.0f, 0.2f, 0.0f, 1.0f};
         glClearBufferfv(GL_COLOR, 0, color);
         glUseProgram(shader.getProgram());
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-        //glPointSize(40.0f);
+        glDrawArrays(GL_PATCHES, 0, 3);
+        
         glfwSwapBuffers(window);
         glfwPollEvents();
     }

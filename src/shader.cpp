@@ -5,8 +5,15 @@
 #include <sstream>
 #include <vector>
 
-Shader::Shader(const std::string& v_path, const std::string& f_path)
-    :vertex_shader_path(v_path), fragment_shader_path(f_path)
+Shader::Shader(
+    const std::string& v_path, 
+    const std::string& f_path,
+    const std::string& tess_c_path,
+    const std::string& tess_e_path)
+        :vertex_shader_path(v_path), 
+        fragment_shader_path(f_path), 
+        tess_control_path(tess_c_path), 
+        tess_evaluation_path(tess_e_path)
 {
     program = createProgram();
 }
@@ -15,19 +22,19 @@ Shader::~Shader() {
     glDeleteProgram(program);
 }
 
-std::string Shader::loadFile(const std::string& filepath) {
+std::optional<std::string> Shader::loadFile(const std::string& filepath) {
     std::ifstream in(filepath);
     if(!in.is_open()) {
         std::cerr << "Error shader path: " << filepath << std::endl;
-        return "";
+        return std::nullopt;
     }
     std::ostringstream ss = std::ostringstream();
     ss << in.rdbuf();
     return ss.str();
 }
 
-GLuint Shader::compileShader(const std::string& shaderContent, const ShaderType& type) {
-    GLuint shader = glCreateShader(type == ShaderType::Vertex ? GL_VERTEX_SHADER : GL_FRAGMENT_SHADER);
+GLuint Shader::compileShader(const std::string& shaderContent, const GLenum& shaderType) {
+    GLuint shader = glCreateShader(shaderType);
     const char* c_str = shaderContent.c_str();
     glShaderSource(shader, 1, &c_str, NULL);
     glCompileShader(shader);
@@ -50,18 +57,43 @@ GLuint Shader::compileShader(const std::string& shaderContent, const ShaderType&
 }
 
 GLuint Shader::createProgram() {
-    std::string vertex_shader_content = loadFile(vertex_shader_path);
-    std::string fragment_shader_content = loadFile(fragment_shader_path);
-    GLuint vertex_shader = compileShader(vertex_shader_content, ShaderType::Vertex);
-    GLuint fragment_shader = compileShader(fragment_shader_content, ShaderType::Fragment);
-    GLuint program = 0;
-    if(vertex_shader != GL_FALSE && fragment_shader != GL_FALSE) {
-        program = glCreateProgram();
-        glAttachShader(program, vertex_shader);
-        glAttachShader(program, fragment_shader);
-        glLinkProgram(program);
+    auto vertex_shader_content = loadFile(vertex_shader_path);
+    auto fragment_shader_content = loadFile(fragment_shader_path);
+    auto tess_control_content = loadFile(tess_control_path);
+    auto tess_evaluation_content = loadFile(tess_evaluation_path);
+
+    GLuint p = glCreateProgram();
+
+    GLuint vertex_shader = 0;
+    if(vertex_shader_content.has_value()) {
+        GLuint vertex_shader = compileShader(vertex_shader_content.value(), GL_VERTEX_SHADER);
+        glAttachShader(p, vertex_shader);
     }
+
+    GLuint fragment_shader = 0;
+    if(fragment_shader_content.has_value()) {
+        fragment_shader = compileShader(fragment_shader_content.value(), GL_FRAGMENT_SHADER);
+        glAttachShader(p, fragment_shader);
+    }
+
+
+    GLuint tess_control_shader = 0;
+    if(tess_control_content.has_value()) {
+        tess_control_shader = compileShader(tess_control_content.value(), GL_TESS_CONTROL_SHADER);
+        glAttachShader(p, tess_control_shader);
+    }
+
+    GLuint tess_evaluation_shader = 0;
+    if(tess_evaluation_content.has_value()) {
+        tess_evaluation_shader = compileShader(tess_evaluation_content.value(), GL_TESS_EVALUATION_SHADER);
+        glAttachShader(p, tess_evaluation_shader);
+    }
+
+    glLinkProgram(p);
+
     glDeleteShader(vertex_shader);
     glDeleteShader(fragment_shader);
-    return program;
+    glDeleteShader(tess_control_shader);
+    glDeleteShader(tess_evaluation_shader);
+    return p;
 }
