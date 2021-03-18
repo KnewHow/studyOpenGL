@@ -1,2 +1,2 @@
 # studyOpenGL
-a repository to study OpenGL
+draw a point with opengl
