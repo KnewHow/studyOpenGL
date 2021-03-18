@@ -1,2 +1,2 @@
 # studyOpenGL
-a repository to study OpenGL
+Drawing a triangle with opengl!
