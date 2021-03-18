@@ -1,2 +1,2 @@
 # studyOpenGL
-Simple fragment demo!
+Fragment shader interpolate demo!
