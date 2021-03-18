@@ -77,7 +77,6 @@ int main(int argc, char *argv[])
         glClearBufferfv(GL_COLOR, 0, color);
         glUseProgram(shader.getProgram());
         glDrawArrays(GL_TRIANGLES, 0, 3);
-        //glPointSize(40.0f);
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
