@@ -61,9 +61,10 @@ int main(int argc, char *argv[])
 
     std::string vertex_shader_path = "../shader/vertex.glsl";
     std::string fragment_shader_path = "../shader/fragment.glsl";
-    std::string tess_control_path = "../shader/tess_control.glsl";
-    std::string tess_evaluation = "../shader/tess_evaluation.glsl";
-    Shader shader(vertex_shader_path, fragment_shader_path, tess_control_path, tess_evaluation);
+    std::string tess_control_shader_path = "../shader/tess_control.glsl";
+    std::string tess_evaluation_shader_path = "../shader/tess_evaluation.glsl";
+    std::string geometry_shader_path = "../shader/geometry.glsl";
+    Shader shader(vertex_shader_path, fragment_shader_path, tess_control_shader_path, tess_evaluation_shader_path, geometry_shader_path);
     std::cout << "program: " << shader.getProgram() << std::endl;
 
     GLuint vertex_array_object;
@@ -77,7 +78,7 @@ int main(int argc, char *argv[])
         glClearBufferfv(GL_COLOR, 0, color);
         glUseProgram(shader.getProgram());
         glDrawArrays(GL_PATCHES, 0, 3);
-        
+        glPointSize(5.0f);
         glfwSwapBuffers(window);
         glfwPollEvents();
     }

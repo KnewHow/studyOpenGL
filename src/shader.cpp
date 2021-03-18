@@ -9,11 +9,13 @@ Shader::Shader(
     const std::string& v_path, 
     const std::string& f_path,
     const std::string& tess_c_path,
-    const std::string& tess_e_path)
+    const std::string& tess_e_path, 
+    const std::string& g_path)
         :vertex_shader_path(v_path), 
         fragment_shader_path(f_path), 
-        tess_control_path(tess_c_path), 
-        tess_evaluation_path(tess_e_path)
+        tess_control_shader_path(tess_c_path), 
+        tess_evaluation_shader_path(tess_e_path),
+        geometry_shader_path(g_path)
 {
     program = createProgram();
 }
@@ -25,7 +27,7 @@ Shader::~Shader() {
 std::optional<std::string> Shader::loadFile(const std::string& filepath) {
     std::ifstream in(filepath);
     if(!in.is_open()) {
-        std::cerr << "Error shader path: " << filepath << std::endl;
+        std::cerr << "Warning: shader path " << filepath << std::endl;
         return std::nullopt;
     }
     std::ostringstream ss = std::ostringstream();
@@ -59,9 +61,9 @@ GLuint Shader::compileShader(const std::string& shaderContent, const GLenum& sha
 GLuint Shader::createProgram() {
     auto vertex_shader_content = loadFile(vertex_shader_path);
     auto fragment_shader_content = loadFile(fragment_shader_path);
-    auto tess_control_content = loadFile(tess_control_path);
-    auto tess_evaluation_content = loadFile(tess_evaluation_path);
-
+    auto tess_control_shader_content = loadFile(tess_control_shader_path);
+    auto tess_evaluation_shader_content = loadFile(tess_evaluation_shader_path);
+    auto geometry_shader_content = loadFile(geometry_shader_path);
     GLuint p = glCreateProgram();
 
     GLuint vertex_shader = 0;
@@ -78,15 +80,21 @@ GLuint Shader::createProgram() {
 
 
     GLuint tess_control_shader = 0;
-    if(tess_control_content.has_value()) {
-        tess_control_shader = compileShader(tess_control_content.value(), GL_TESS_CONTROL_SHADER);
+    if(tess_control_shader_content.has_value()) {
+        tess_control_shader = compileShader(tess_control_shader_content.value(), GL_TESS_CONTROL_SHADER);
         glAttachShader(p, tess_control_shader);
     }
 
     GLuint tess_evaluation_shader = 0;
-    if(tess_evaluation_content.has_value()) {
-        tess_evaluation_shader = compileShader(tess_evaluation_content.value(), GL_TESS_EVALUATION_SHADER);
+    if(tess_evaluation_shader_content.has_value()) {
+        tess_evaluation_shader = compileShader(tess_evaluation_shader_content.value(), GL_TESS_EVALUATION_SHADER);
         glAttachShader(p, tess_evaluation_shader);
+    }
+
+    GLuint geometry_shader = 0;
+    if(geometry_shader_content.has_value()) {
+        geometry_shader = compileShader(geometry_shader_content.value(), GL_GEOMETRY_SHADER);
+        glAttachShader(p, geometry_shader);
     }
 
     glLinkProgram(p);
@@ -95,5 +103,6 @@ GLuint Shader::createProgram() {
     glDeleteShader(fragment_shader);
     glDeleteShader(tess_control_shader);
     glDeleteShader(tess_evaluation_shader);
+    glDeleteShader(geometry_shader);
     return p;
 }
