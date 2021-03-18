@@ -1,2 +1,2 @@
 # studyOpenGL
-a repository to study OpenGL
+Somes example show data passing between program.
