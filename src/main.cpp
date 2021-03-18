@@ -59,8 +59,8 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    std::string vertex_shader_path = "../shader/vertex.vert";
-    std::string fragment_shader_path = "../shader/fragment.frag";
+    std::string vertex_shader_path = "../shader/vertex.glsl";
+    std::string fragment_shader_path = "../shader/fragment.glsl";
     Shader shader(vertex_shader_path, fragment_shader_path);
     std::cout << "program: " << shader.getProgram() << std::endl;
 
