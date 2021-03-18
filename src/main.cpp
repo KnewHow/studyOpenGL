@@ -2,6 +2,8 @@
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 #include <iostream>
+#include <time.h>
+#include <cmath>
 
 #include "shader.hpp"
 
@@ -11,6 +13,14 @@ namespace
     {
         fprintf(stderr, "GLFW error %d: %s\n", error, description);
     }
+
+
+    time_t getCurrentTime() {
+        time_t seconds;
+        seconds = time(NULL);
+        return seconds;
+    }
+
 
     GLFWwindow *initialize()
     {
@@ -70,14 +80,34 @@ int main(int argc, char *argv[])
     
     // Set the clear color to a nice green
     glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
-
+    int cnt = 0;
     while (!glfwWindowShouldClose(window))
     {
-        const GLfloat color[] = {0.0f, 0.2f, 0.0f, 1.0f};
+        const GLfloat color[] = {1.0f, 0.0f, 0.0f, 1.0f};
         glClearBufferfv(GL_COLOR, 0, color);
         glUseProgram(shader.getProgram());
+        long int currentTime = getCurrentTime();
+        int angle = currentTime % 360;
+        float angle_rad = angle * M_PI / 180.0f;
+        const GLfloat attrib[] = {
+            sinf(angle_rad) * 0.5f,
+            cosf(angle_rad) * 0.6f,
+            0.0f,
+            0.0f
+        };
+        GLfloat r = sinf(angle_rad) * 0.5f + 0.5f;
+        GLfloat g = cosf(angle_rad) * 0.5f + 0.5f;
+        const GLfloat t_color[4] = {
+            r,
+            g,
+            0.0f,
+            1.0f
+        };
+        std::cout << "current time: " << currentTime << ", sin(angle_rad): " << sinf(angle_rad) << ", " << "cos(angle_rad): " << cosf(angle_rad) << ", " << "red: " << r << ", green: " << g <<std::endl;
+        glVertexAttrib4fv(0, attrib);
+        glVertexAttrib4fv(1, t_color);
         glDrawArrays(GL_TRIANGLES, 0, 3);
-        //glPointSize(40.0f);
+        cnt++;
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
