@@ -5,6 +5,7 @@
 
 #include <vector.hpp>
 #include "shader.hpp"
+#include <model/model.hpp>
 
 namespace
 {
@@ -64,17 +65,16 @@ int main(int argc, char *argv[])
     std::string fragment_shader_path = "../shader/fragment.glsl";
     Shader shader(vertex_shader_path, fragment_shader_path);
     std::cout << "program: " << shader.getProgram() << std::endl;
+    std::string model_path = "../res/cube/cube.obj";
 
+    Model m(model_path);
 
     const math::vec4f color[] = {
         math::vec4f(0.0, 0.8, 1.0, 1.0f)
     };
 
-    const math::vec4f positions[3] = {
-        math::vec4f(0.25, -0.25, 0.5, 1.0),
-        math::vec4f(-0.25, -0.25, 0.5, 1.0),
-        math::vec4f(0.25, 0.25, 0.5, 1.0)
-    };
+    std::vector<math::vec4f> position = m.getTriangles();
+    std::cout << "triangle size: " << position.size() << std::endl;
 
     GLuint buffer[2];
     glCreateBuffers(2, &buffer[0]); // create buffer
@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
     glCreateVertexArrays(1, &VAO);
 
     glNamedBufferStorage(buffer[0], 1024 * 1024, NULL, GL_DYNAMIC_STORAGE_BIT); // allocate storage in memory, must use `GL_DYNAMIC_STORAGE_BIT` in here
-    glNamedBufferSubData(buffer[0], 0, sizeof(positions), positions); // copy data from positions to storage allocated above
+    glNamedBufferSubData(buffer[0], 0, sizeof(math::vec4f) * position.size(), &position[0]); // copy data from positions to storage allocated above
     glBindBuffer(GL_ARRAY_BUFFER, buffer[0]); // bind this to array buffer
 
     glBindVertexArray(VAO);
