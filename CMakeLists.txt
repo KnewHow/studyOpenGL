@@ -7,8 +7,10 @@ set(LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib")
 set(SOURCES "${SRC_DIR}/main.cpp")
 
 file(GLOB SOURCES
-    "${SRC_DIR}/*.h"
+    "${SRC_DIR}/*.hpp"
     "${SRC_DIR}/*.cpp"
+    "${SRC_DIR}/model/*.hpp"
+    "${SRC_DIR}/model/*.cpp"
 )
 
 
@@ -27,6 +29,11 @@ add_subdirectory("${GLFW_DIR}")
 target_link_libraries(${PROJECT_NAME} "glfw" "${GLFW_LIBRARIES}")
 target_include_directories(${PROJECT_NAME} PRIVATE "${GLFW_DIR}/include")
 target_compile_definitions(${PROJECT_NAME} PRIVATE "GLFW_INCLUDE_NONE")
+
+#math
+set(MATH_DIR "${LIB_DIR}/math")
+target_include_directories(${PROJECT_NAME} PRIVATE "${MATH_DIR}")
+target_compile_definitions(${PROJECT_NAME} PRIVATE "MATH_INCLUDE_NONE")
 
 #glad
 set(GLAD_DIR "${LIB_DIR}/glad")

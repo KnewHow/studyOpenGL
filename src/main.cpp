@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <iostream>
 
+#include <vector.hpp>
 #include "shader.hpp"
 
 namespace
@@ -65,13 +66,14 @@ int main(int argc, char *argv[])
     std::cout << "program: " << shader.getProgram() << std::endl;
 
 
-    const GLfloat positions[] = {
-        0.25, -0.25, 0.5, 1.0,
-        -0.25, -0.25, 0.5, 1.0,
-        0.25, 0.25, 0.5, 1.0
+    const math::vec4f color[] = {
+        math::vec4f(0.0, 0.8, 1.0, 1.0f)
     };
-    const GLfloat color[] = {
-        0.0, 0.8, 1.0, 1.0f
+
+    const math::vec4f positions[3] = {
+        math::vec4f(0.25, -0.25, 0.5, 1.0),
+        math::vec4f(-0.25, -0.25, 0.5, 1.0),
+        math::vec4f(0.25, 0.25, 0.5, 1.0)
     };
 
     GLuint buffer[2];
@@ -84,13 +86,13 @@ int main(int argc, char *argv[])
     glBindBuffer(GL_ARRAY_BUFFER, buffer[0]); // bind this to array buffer
 
     glBindVertexArray(VAO);
-    glVertexArrayVertexBuffer(VAO, 0, buffer[0], 0, 4 * sizeof(float));
+    glVertexArrayVertexBuffer(VAO, 0, buffer[0], 0, sizeof(math::vec4f));
     glVertexArrayAttribFormat(VAO, 0, 4, GL_FLOAT, GL_FALSE, 0);
     // glVertexArrayAttribBinding(VAO, 0, 0);
     glEnableVertexArrayAttrib(VAO, 0);
 
     glNamedBufferStorage(buffer[1], sizeof(color), color, GL_DYNAMIC_STORAGE_BIT);
-    glVertexArrayVertexBuffer(VAO, 1, buffer[1], 0, 4 * sizeof(float));
+    glVertexArrayVertexBuffer(VAO, 1, buffer[1], 0, sizeof(math::vec4f));
     glVertexArrayAttribFormat(VAO, 1, 4, GL_FLOAT, GL_FALSE, 0);
     glEnableVertexArrayAttrib(VAO, 1);
     
