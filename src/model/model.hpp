@@ -21,5 +21,6 @@ public:
     inline int nfaces() { return _faces_vert.size() / 3; }
     inline math::vec4f vert(int iface, int nthvert) { return math::embed<float, 4>(_verteces[iface * 3 + nthvert]); }
     std::vector<math::vec4f> getTriangles(); // get all triangles
+    std::vector<math::vec3f> getTriangles3f();
     std::vector<math::vec4f> getVertes4f();
 };

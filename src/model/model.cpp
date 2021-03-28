@@ -78,3 +78,15 @@ std::vector<math::vec4f> Model::getTriangles() {
     }
     return res;
 }
+
+std::vector<math::vec3f> Model::getTriangles3f() {
+    std::vector<math::vec3f> res;
+    for(int i = 0;  i < nfaces(); i++) {
+        for(int j = 0; j < 3; j++) {
+            auto t = vert(i, j) * 0.25f;
+            math::vec3f v = math::vec3f(t.x, t.y, t.z);
+            res.push_back(v);
+        }
+    }
+    return res;
+}
