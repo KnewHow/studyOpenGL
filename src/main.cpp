@@ -106,25 +106,23 @@ int main(int argc, char *argv[])
     glBindBuffer(GL_ARRAY_BUFFER, 0); // cancel bind
     glBindVertexArray(0);
 
-    GLuint dynamic_color_id = glGetUniformLocation(shader.getProgram(), "dynamic_color");
-
     while (!glfwWindowShouldClose(window))
     {
         processInput(window);
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         glBindVertexArray(VAO);
-        glUseProgram(shader.getProgram());
+        shader.use();
         float time = glfwGetTime();
         float green = std::sin(time) / 2.0f + 0.5f;
-        glUniform4f(dynamic_color_id, 0.0f, green, 0.0f, 1.0f);
+        shader.setVec4f("dynamic_color", 0.0f, green, 0.0f, 1.0f);
         glDrawArrays(GL_TRIANGLES, 0, 3);
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
-    glDeleteProgram(shader.getProgram());
+    shader.destory();
     glfwDestroyWindow(window);
     glfwTerminate();
     return 0;

@@ -76,3 +76,15 @@ GLuint Shader::createProgram() {
     glDeleteShader(fragment_shader);
     return program;
 }
+
+void Shader::setVec4f(const std::string& name, float x, float y, float z, float w) const {
+    glUniform4f(glGetUniformLocation(program, name.c_str()), x, y, z, w);
+}
+
+void Shader::setBool(const std::string& name, bool v) {
+    glUniform1i(glGetUniformLocation(program, name.c_str()), (int)v);
+}
+
+void Shader::setInt(const std::string name, int v) {
+    glUniform1i(glGetUniformLocation(program, name.c_str()), v);
+}
