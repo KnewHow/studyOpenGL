@@ -1,9 +1,10 @@
 #version 450 core
 
+in vec3 ourColor;
+
 out vec4 color;
 
-uniform vec4 dynamic_color;
 
 void main(void) {
-    color = dynamic_color;
+    color = vec4(ourColor, 1.0);
 }
