@@ -12,7 +12,8 @@ Shader::Shader(const std::string& v_path, const std::string& f_path)
 }
 
 Shader::~Shader() {
-    glDeleteProgram(program);
+    std::cout << "Shader destroy!" << std::endl;
+    //glDeleteProgram(program);
 }
 
 std::string Shader::loadFile(const std::string& filepath) {
