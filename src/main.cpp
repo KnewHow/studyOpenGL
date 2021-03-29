@@ -5,11 +5,30 @@
 
 #include "shader.hpp"
 
+const int width = 1366;
+const int height = 768;
+
 namespace
 {
     void errorCallback(int error, const char *description)
     {
         fprintf(stderr, "GLFW error %d: %s\n", error, description);
+    }
+
+    /**
+     * resize viewport when window resize
+    */
+    void framebuffer_size_callback(GLFWwindow* window, int w, int h) {
+        glViewport(0, 0, w, h);
+    }
+
+    /**
+     * deal with input from user
+    */
+    void processInput(GLFWwindow* window) {
+        if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+            glfwSetWindowShouldClose(window, true);
+        }
     }
 
     GLFWwindow *initialize()
@@ -26,7 +45,7 @@ namespace
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
-        GLFWwindow *window = glfwCreateWindow(1366, 768, "StudyOpenGL", nullptr, nullptr);
+        GLFWwindow *window = glfwCreateWindow(width, height, "StudyOpenGL", nullptr, nullptr);
         if (!window)
         {
             fprintf(stderr, "Unable to create GLFW window\n");
@@ -59,6 +78,8 @@ int main(int argc, char *argv[])
         return 0;
     }
 
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
     std::string vertex_shader_path = "../shader/vertex.glsl";
     std::string fragment_shader_path = "../shader/fragment.glsl";
     Shader shader(vertex_shader_path, fragment_shader_path);
@@ -73,15 +94,15 @@ int main(int argc, char *argv[])
 
     while (!glfwWindowShouldClose(window))
     {
-        const GLfloat color[] = {0.0f, 0.2f, 0.0f, 1.0f};
-        glClearBufferfv(GL_COLOR, 0, color);
+        processInput(window);
+      
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
         glUseProgram(shader.getProgram());
         glDrawArrays(GL_TRIANGLES, 0, 3);
-        //glPointSize(40.0f);
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-
     glfwDestroyWindow(window);
     glfwTerminate();
 
