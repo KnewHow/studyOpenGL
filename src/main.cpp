@@ -86,25 +86,37 @@ int main(int argc, char *argv[])
     std::cout << "program: " << shader.getProgram() << std::endl;
 
     GLfloat vertices[] = {
-        -0.5f, -0.5f, 0.0f,
-         0.5f, -0.5f, 0.0f, 
-         0.0f,  0.5f, 0.0f  
+        0.5f,  0.5f, 0.0f,  // top right
+        0.5f, -0.5f, 0.0f,  // bottom right
+        -0.5f, -0.5f, 0.0f,  // bottom left
+        -0.5f,  0.5f, 0.0f   // top left 
     };
 
-    GLuint VAO;
+    GLuint indces[] = {
+        0, 1, 3,
+        3, 1, 2
+    };
+
+    GLuint VAO, VBO, EBO;
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
-
-    GLuint VBO;
     glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
+
+
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0); // cancel bind
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indces), indces, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0); // unbind
     glBindVertexArray(0);
 
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); wire frame mode
 
     while (!glfwWindowShouldClose(window))
     {
@@ -113,7 +125,7 @@ int main(int argc, char *argv[])
         glClear(GL_COLOR_BUFFER_BIT);
         glBindVertexArray(VAO);
         glUseProgram(shader.getProgram());
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)0);
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
