@@ -2,6 +2,7 @@
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 #include <iostream>
+#include <cmath>
 
 #include "shader.hpp"
 
@@ -105,6 +106,7 @@ int main(int argc, char *argv[])
     glBindBuffer(GL_ARRAY_BUFFER, 0); // cancel bind
     glBindVertexArray(0);
 
+    GLuint dynamic_color_id = glGetUniformLocation(shader.getProgram(), "dynamic_color");
 
     while (!glfwWindowShouldClose(window))
     {
@@ -113,6 +115,9 @@ int main(int argc, char *argv[])
         glClear(GL_COLOR_BUFFER_BIT);
         glBindVertexArray(VAO);
         glUseProgram(shader.getProgram());
+        float time = glfwGetTime();
+        float green = std::sin(time) / 2.0f + 0.5f;
+        glUniform4f(dynamic_color_id, 0.0f, green, 0.0f, 1.0f);
         glDrawArrays(GL_TRIANGLES, 0, 3);
         glfwSwapBuffers(window);
         glfwPollEvents();
