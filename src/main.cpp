@@ -87,9 +87,9 @@ int main(int argc, char *argv[])
     std::cout << "program: " << shader.getProgram() << std::endl;
 
     GLfloat vertices[] = {
-        -0.5f, -0.5f, 0.0f,
-         0.5f, -0.5f, 0.0f, 
-         0.0f,  0.5f, 0.0f  
+        0.5f, 0.5f, 0.0f,
+         -0.5f, 0.5f, 0.0f, 
+         0.0f,  -0.5f, 0.0f  
     };
 
     GLuint VAO;
@@ -114,11 +114,6 @@ int main(int argc, char *argv[])
         glClear(GL_COLOR_BUFFER_BIT);
         glBindVertexArray(VAO);
         shader.use();
-        float time = glfwGetTime();
-        float green = std::sin(time) / 2.0f + 0.5f;
-        shader.setVec4f("dynamic_color", 0.0f, green, 0.0f, 1.0f);
-        shader.setFloat("horizontan_soffset", offset);
-        offset += 0.001;
         glDrawArrays(GL_TRIANGLES, 0, 3);
         glfwSwapBuffers(window);
         glfwPollEvents();
