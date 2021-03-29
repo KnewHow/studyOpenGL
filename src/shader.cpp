@@ -60,6 +60,16 @@ GLuint Shader::createProgram() {
         glAttachShader(program, vertex_shader);
         glAttachShader(program, fragment_shader);
         glLinkProgram(program);
+        GLint success = false;
+        glGetProgramiv(program, GL_LINK_STATUS, &success);
+        if(!success) {
+            GLint length = 0;
+            glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length);
+            std::vector<GLchar> log(length);
+            glGetProgramInfoLog(program, length, &length, &log[0]);
+            std::string err_msg = std::string(log.begin(), log.end());
+            std::cout << "shader link error: " << err_msg << std::endl;
+        }
     }
     glDeleteShader(vertex_shader);
     glDeleteShader(fragment_shader);

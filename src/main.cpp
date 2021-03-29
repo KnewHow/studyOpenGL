@@ -64,20 +64,31 @@ int main(int argc, char *argv[])
     Shader shader(vertex_shader_path, fragment_shader_path);
     std::cout << "program: " << shader.getProgram() << std::endl;
 
-    GLuint vertex_array_object;
-    glCreateVertexArrays(1, &vertex_array_object);
-    glBindVertexArray(vertex_array_object);
-    
-    // Set the clear color to a nice green
-    glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+    GLfloat vertices[] = {
+        -0.5f, -0.5f, 0.0f,
+         0.5f, -0.5f, 0.0f, 
+         0.0f,  0.5f, 0.0f  
+    };
+
+    GLuint VAO;
+    glCreateVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+
+    GLuint VBO;
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0); // cancel bind
+    glBindVertexArray(0);
+
 
     while (!glfwWindowShouldClose(window))
     {
-        const GLfloat color[] = {0.0f, 0.2f, 0.0f, 1.0f};
-        glClearBufferfv(GL_COLOR, 0, color);
+        
         glUseProgram(shader.getProgram());
         glDrawArrays(GL_TRIANGLES, 0, 3);
-        //glPointSize(40.0f);
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
