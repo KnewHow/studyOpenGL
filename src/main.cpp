@@ -106,6 +106,7 @@ int main(int argc, char *argv[])
     glBindBuffer(GL_ARRAY_BUFFER, 0); // cancel bind
     glBindVertexArray(0);
 
+    float offset = 0;
     while (!glfwWindowShouldClose(window))
     {
         processInput(window);
@@ -116,6 +117,8 @@ int main(int argc, char *argv[])
         float time = glfwGetTime();
         float green = std::sin(time) / 2.0f + 0.5f;
         shader.setVec4f("dynamic_color", 0.0f, green, 0.0f, 1.0f);
+        shader.setFloat("horizontan_soffset", offset);
+        offset += 0.001;
         glDrawArrays(GL_TRIANGLES, 0, 3);
         glfwSwapBuffers(window);
         glfwPollEvents();

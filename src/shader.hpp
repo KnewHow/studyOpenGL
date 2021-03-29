@@ -19,8 +19,9 @@ public:
      * @param {x, y, z, w} the vec4f
     */
     void setVec4f(const std::string& name, float x, float y, float z, float w) const;
-    void setBool(const std::string& name, bool v); // set bool uniform variable 
-    void setInt(const std::string name, int v); // set int uniform variable
+    void setBool(const std::string& name, bool v) const; // set bool uniform variable 
+    void setInt(const std::string name, int v) const; // set int uniform variable
+    void setFloat(const std::string& name, float v) const;
     
     inline void destory() const { glDeleteProgram(program); } 
 
