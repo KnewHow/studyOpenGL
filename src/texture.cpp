@@ -7,23 +7,30 @@
 
 
 Texture::Texture(const std::string& p) 
-    :width(0), height(0), nrChannels(0), ID(0), data(nullptr), path(p), format(GL_RGB), isFlipVertically(false)
+    :width(0), height(0), nrChannels(0), ID(0), data(nullptr), path(p), format(GL_RGB), isFlipVertically(false), wrappingMode(GL_REPEAT)
 {
     loadTexture();
 }
 
 Texture::Texture(const std::string& p, GLenum format)
-    :width(0), height(0), nrChannels(0), ID(0), data(nullptr), path(p), format(format), isFlipVertically(false)
+    :width(0), height(0), nrChannels(0), ID(0), data(nullptr), path(p), format(format), isFlipVertically(false), wrappingMode(GL_REPEAT)
 {
     loadTexture();
 }
 
 
 Texture::Texture(const std::string& p,  GLenum format, bool isFlipVertically)
-    :width(0), height(0), nrChannels(0), ID(0), data(nullptr), path(p), format(format), isFlipVertically(isFlipVertically)
+    :width(0), height(0), nrChannels(0), ID(0), data(nullptr), path(p), format(format), isFlipVertically(isFlipVertically), wrappingMode(GL_REPEAT)
 {
     loadTexture();
 }
+
+Texture::Texture(const std::string& p,  GLenum format, bool isFlipVertically, GLint wrappingMode) 
+    :width(0), height(0), nrChannels(0), ID(0), data(nullptr), path(p), format(format), isFlipVertically(isFlipVertically), wrappingMode(wrappingMode)
+{
+    loadTexture();
+}
+
 
 Texture::~Texture() {
     freeData();
@@ -34,8 +41,8 @@ void Texture::bind() {
         glGenTextures(1, &ID);
         glBindTexture(GL_TEXTURE_2D, ID);
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrappingMode);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrappingMode);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINE);
 
@@ -59,4 +66,8 @@ void Texture::freeData() {
 void Texture::loadTexture() {
     stbi_set_flip_vertically_on_load(isFlipVertically); 
     data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
+}
+
+void Texture::setWrappingMode(GLint mode) {
+    wrappingMode = mode;
 }

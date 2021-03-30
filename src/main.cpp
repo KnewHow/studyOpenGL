@@ -88,15 +88,17 @@ int main(int argc, char *argv[])
     std::string texture_path2 = "../res/texture/awesomeface.png";
     Shader shader(vertex_shader_path, fragment_shader_path);
     Texture texture1(texture_path1);
+    texture1.setWrappingMode(GL_CLAMP_TO_EDGE);
     Texture texture2(texture_path2, GL_RGBA, true);
+    //texture2.setWrappingMode(GL_MIRROR_CLAMP_TO_EDGE);
     std::cout << "program: " << shader.getProgram() << std::endl;
 
     GLfloat vertices[] = {
         // position            color              uv
-        0.5f, 0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,
-        0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   1.0f, 0.0f, 
+        0.5f, 0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   2.0f, 2.0f,
+        0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   2.0f, 0.0f, 
         -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,   0.0f, 0.0f,
-        -0.5f, 0.5f, 0.0f,  1.0f, 1.0f, 0.0f,   0.0f, 1.0f,
+        -0.5f, 0.5f, 0.0f,  1.0f, 1.0f, 0.0f,   0.0f, 2.0f,
     };
 
 

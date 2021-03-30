@@ -12,11 +12,13 @@ private:
     unsigned char* data;
     GLenum format;
     bool isFlipVertically;
+    GLuint wrappingMode;
     void loadTexture();
 public:
     Texture(const std::string& p);
     Texture(const std::string& p,  GLenum format);
     Texture(const std::string& p,  GLenum format, bool isFlipVertically);
+    Texture(const std::string& p,  GLenum format, bool isFlipVertically, GLint wrappingMode);
     ~Texture();
     inline int getWidth() { return width; }
     inline int getHeight() { return height; }
@@ -27,4 +29,5 @@ public:
     void bind();
     void unbind();
     void freeData();
+    void setWrappingMode(GLint mode);
 };
