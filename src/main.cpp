@@ -5,6 +5,7 @@
 #include <cmath>
 
 #include "shader.hpp"
+#include "texture.hpp"
 
 const int width = 1366;
 const int height = 768;
@@ -83,25 +84,49 @@ int main(int argc, char *argv[])
 
     std::string vertex_shader_path = "../shader/vertex.glsl";
     std::string fragment_shader_path = "../shader/fragment.glsl";
+    std::string texture_path = "../res/texture/container.jpg";
     Shader shader(vertex_shader_path, fragment_shader_path);
+    Texture texture(texture_path);
     std::cout << "program: " << shader.getProgram() << std::endl;
 
     GLfloat vertices[] = {
-        -0.5f, -0.5f, 0.0f,
-         0.5f, -0.5f, 0.0f, 
-         0.0f,  0.5f, 0.0f  
+        // position            color              uv
+        0.5f, 0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,
+        0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   1.0f, 0.0f, 
+        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,   0.0f, 0.0f,
+        -0.5f, 0.5f, 0.0f,  1.0f, 1.0f, 0.0f,   0.0f, 1.0f,
     };
+
+
+    GLuint indices[] = {
+        0, 1, 3,
+        3, 1, 2
+    };
+
 
     GLuint VAO;
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
 
+    GLuint EBO;
+    glGenBuffers(1, &EBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
     GLuint VBO;
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    
+    GLsizei stride = 8 * sizeof(float);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
     glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride, (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0); // cancel bind
     glBindVertexArray(0);
@@ -113,13 +138,9 @@ int main(int argc, char *argv[])
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         glBindVertexArray(VAO);
+        texture.bind();
         shader.use();
-        float time = glfwGetTime();
-        float green = std::sin(time) / 2.0f + 0.5f;
-        shader.setVec4f("dynamic_color", 0.0f, green, 0.0f, 1.0f);
-        shader.setFloat("horizontan_soffset", offset);
-        offset += 0.001;
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)0);
         glfwSwapBuffers(window);
         glfwPollEvents();
     }

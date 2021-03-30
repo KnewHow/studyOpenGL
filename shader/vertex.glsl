@@ -1,9 +1,14 @@
 #version 450 core
 
-layout(location = 0) in vec3 position;
+layout(location = 0) in vec3 aPosition;
+layout(location = 1) in vec3 aColor;
+layout(location = 2) in vec2 uv;
 
-uniform float horizontan_soffset;
+out vec2 uvCoords;
+out vec3 ourColor;
 
 void main(void) {
-    gl_Position = vec4(position.x + horizontan_soffset, -position.y, position.z, 1.0f);
+    gl_Position = vec4(aPosition, 1.0f);
+    uvCoords = uv;
+    ourColor = aColor;
 }

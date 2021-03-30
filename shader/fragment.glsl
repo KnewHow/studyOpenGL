@@ -2,8 +2,11 @@
 
 out vec4 color;
 
-uniform vec4 dynamic_color;
+in vec2 uvCoords;
+in vec3 ourColor;
+
+uniform sampler2D ourTexture;
 
 void main(void) {
-    color = dynamic_color;
+    color = texture(ourTexture, uvCoords);
 }
