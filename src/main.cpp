@@ -84,9 +84,11 @@ int main(int argc, char *argv[])
 
     std::string vertex_shader_path = "../shader/vertex.glsl";
     std::string fragment_shader_path = "../shader/fragment.glsl";
-    std::string texture_path = "../res/texture/container.jpg";
+    std::string texture_path1 = "../res/texture/container.jpg";
+    std::string texture_path2 = "../res/texture/awesomeface.png";
     Shader shader(vertex_shader_path, fragment_shader_path);
-    Texture texture(texture_path);
+    Texture texture1(texture_path1);
+    Texture texture2(texture_path2, GL_RGBA, true);
     std::cout << "program: " << shader.getProgram() << std::endl;
 
     GLfloat vertices[] = {
@@ -131,14 +133,20 @@ int main(int argc, char *argv[])
     glBindBuffer(GL_ARRAY_BUFFER, 0); // cancel bind
     glBindVertexArray(0);
 
-    float offset = 0;
+    shader.use();
+    shader.setInt("texture1", 0);
+    shader.setInt("texture2", 1);
+    
     while (!glfwWindowShouldClose(window))
     {
         processInput(window);
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         glBindVertexArray(VAO);
-        texture.bind();
+        glActiveTexture(GL_TEXTURE0);
+        texture1.bind();
+        glActiveTexture(GL_TEXTURE1);
+        texture2.bind();
         shader.use();
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)0);
         glfwSwapBuffers(window);

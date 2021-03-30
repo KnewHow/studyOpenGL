@@ -10,8 +10,13 @@ private:
     std::string path;
     GLuint ID;
     unsigned char* data;
+    GLenum format;
+    bool isFlipVertically;
+    void loadTexture();
 public:
     Texture(const std::string& p);
+    Texture(const std::string& p,  GLenum format);
+    Texture(const std::string& p,  GLenum format, bool isFlipVertically);
     ~Texture();
     inline int getWidth() { return width; }
     inline int getHeight() { return height; }
