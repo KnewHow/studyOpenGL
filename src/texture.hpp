@@ -13,6 +13,7 @@ private:
     GLenum format;
     bool isFlipVertically;
     GLuint wrappingMode;
+    GLuint filterMode;
     void loadTexture();
 public:
     Texture(const std::string& p);
@@ -29,5 +30,6 @@ public:
     void bind();
     void unbind();
     void freeData();
-    void setWrappingMode(GLint mode);
+    void setWrappingMode(GLint wraping);
+    void setFilterMode(GLint filter);
 };

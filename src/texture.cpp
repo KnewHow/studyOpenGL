@@ -7,26 +7,26 @@
 
 
 Texture::Texture(const std::string& p) 
-    :width(0), height(0), nrChannels(0), ID(0), data(nullptr), path(p), format(GL_RGB), isFlipVertically(false), wrappingMode(GL_REPEAT)
+    :width(0), height(0), nrChannels(0), ID(0), data(nullptr), path(p), format(GL_RGB), isFlipVertically(false), wrappingMode(GL_REPEAT), filterMode(GL_LINE)
 {
     loadTexture();
 }
 
 Texture::Texture(const std::string& p, GLenum format)
-    :width(0), height(0), nrChannels(0), ID(0), data(nullptr), path(p), format(format), isFlipVertically(false), wrappingMode(GL_REPEAT)
+    :width(0), height(0), nrChannels(0), ID(0), data(nullptr), path(p), format(format), isFlipVertically(false), wrappingMode(GL_REPEAT), filterMode(GL_LINE)
 {
     loadTexture();
 }
 
 
 Texture::Texture(const std::string& p,  GLenum format, bool isFlipVertically)
-    :width(0), height(0), nrChannels(0), ID(0), data(nullptr), path(p), format(format), isFlipVertically(isFlipVertically), wrappingMode(GL_REPEAT)
+    :width(0), height(0), nrChannels(0), ID(0), data(nullptr), path(p), format(format), isFlipVertically(isFlipVertically), wrappingMode(GL_REPEAT), filterMode(GL_LINE)
 {
     loadTexture();
 }
 
 Texture::Texture(const std::string& p,  GLenum format, bool isFlipVertically, GLint wrappingMode) 
-    :width(0), height(0), nrChannels(0), ID(0), data(nullptr), path(p), format(format), isFlipVertically(isFlipVertically), wrappingMode(wrappingMode)
+    :width(0), height(0), nrChannels(0), ID(0), data(nullptr), path(p), format(format), isFlipVertically(isFlipVertically), wrappingMode(wrappingMode), filterMode(GL_LINE)
 {
     loadTexture();
 }
@@ -43,8 +43,8 @@ void Texture::bind() {
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrappingMode);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrappingMode);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterMode);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterMode);
 
         glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
@@ -68,6 +68,10 @@ void Texture::loadTexture() {
     data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
 }
 
-void Texture::setWrappingMode(GLint mode) {
-    wrappingMode = mode;
+void Texture::setWrappingMode(GLint wrapping) {
+    wrappingMode = wrapping;
+}
+
+void Texture::setFilterMode(GLint filter) {
+    filterMode = filter;
 }
