@@ -10,6 +10,8 @@
 const int width = 1366;
 const int height = 768;
 
+float mixValue = 0.2;
+
 namespace
 {
     void errorCallback(int error, const char *description)
@@ -30,6 +32,16 @@ namespace
     void processInput(GLFWwindow* window) {
         if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
             glfwSetWindowShouldClose(window, true);
+        } else if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+            mixValue -= 0.001;
+            if(mixValue < 0.0f) {
+                mixValue = 0.0f;
+            }
+        } else if(glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+            mixValue += 0.001;
+            if(mixValue > 1.0f) {
+                mixValue = 1.0f;
+            }
         }
     }
 
@@ -95,10 +107,10 @@ int main(int argc, char *argv[])
 
     GLfloat vertices[] = {
         // position            color              uv
-        0.5f, 0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   0.55f, 0.55f,
-        0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   0.55f, 0.45f, 
-        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,   0.45f, 0.45f,
-        -0.5f, 0.5f, 0.0f,  1.0f, 1.0f, 0.0f,   0.45f, 0.55f,
+        0.5f, 0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,
+        0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   1.0f, 0.0f, 
+        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,   0.0f, 0.0f,
+        -0.5f, 0.5f, 0.0f,  1.0f, 1.0f, 0.0f,   0.0f, 1.0f,
     };
 
 
@@ -150,6 +162,7 @@ int main(int argc, char *argv[])
         glActiveTexture(GL_TEXTURE1);
         texture2.bind();
         shader.use();
+        shader.setFloat("mixAlpha", mixValue);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)0);
         glfwSwapBuffers(window);
         glfwPollEvents();

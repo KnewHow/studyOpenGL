@@ -12,8 +12,8 @@ private:
     unsigned char* data;
     GLenum format;
     bool isFlipVertically;
-    GLuint wrappingMode;
-    GLuint filterMode;
+    GLint wrappingMode;
+    GLint filterMode;
     void loadTexture();
 public:
     Texture(const std::string& p);
