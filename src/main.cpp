@@ -88,9 +88,9 @@ int main(int argc, char *argv[])
     std::string texture_path2 = "../res/texture/awesomeface.png";
     Shader shader(vertex_shader_path, fragment_shader_path);
     Texture texture1(texture_path1);
-    //texture1.setFilterMode(GL_NEAREST);
+    texture1.setFilterMode(GL_LINE);
     Texture texture2(texture_path2, GL_RGBA, true);
-    texture2.setFilterMode(GL_NEAREST);
+    texture2.setFilterMode(GL_LINE);
     std::cout << "program: " << shader.getProgram() << std::endl;
 
     GLfloat vertices[] = {
