@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <cmath>
+#include <vec3.hpp>
 
 #include "shader.hpp"
 #include "texture.hpp"
@@ -170,6 +171,7 @@ int main(int argc, char *argv[])
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     shader.destory();
+    glm::vec3 v = glm::vec3(1, 2,3);
     glfwDestroyWindow(window);
     glfwTerminate();
     return 0;
