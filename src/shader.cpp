@@ -4,6 +4,7 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <gtc/type_ptr.hpp>
 
 Shader::Shader(const std::string& v_path, const std::string& f_path)
     :vertex_shader_path(v_path), fragment_shader_path(f_path)
@@ -91,4 +92,8 @@ void Shader::setInt(const std::string name, int v) const {
 
 void Shader::setFloat(const std::string& name, float v) const {
      glUniform1f(glGetUniformLocation(program, name.c_str()), v);
+}
+
+void Shader::setMat4(const std::string& name, const glm::mat4& mat) const {
+    glUniformMatrix4fv(glGetUniformLocation(program, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
 }

@@ -4,6 +4,8 @@
 #include <iostream>
 #include <cmath>
 #include <vec3.hpp>
+#include <matrix.hpp>
+#include <gtc/matrix_transform.hpp>
 
 #include "shader.hpp"
 #include "texture.hpp"
@@ -107,11 +109,11 @@ int main(int argc, char *argv[])
     std::cout << "program: " << shader.getProgram() << std::endl;
 
     GLfloat vertices[] = {
-        // position            color              uv
-        0.5f, 0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,
-        0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   1.0f, 0.0f, 
-        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,   0.0f, 0.0f,
-        -0.5f, 0.5f, 0.0f,  1.0f, 1.0f, 0.0f,   0.0f, 1.0f,
+        // position            uv            
+        0.5f, 0.5f, 0.0f,   1.0f, 1.0f,
+        0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 
+        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
+        -0.5f, 0.5f, 0.0f,  0.0f, 1.0f,
     };
 
 
@@ -135,15 +137,13 @@ int main(int argc, char *argv[])
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
     
-    GLsizei stride = 8 * sizeof(float);
+    GLsizei stride = 5 * sizeof(float);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
     glEnableVertexAttribArray(0);
 
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
 
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride, (void*)(6 * sizeof(float)));
-    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride, (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0); // cancel bind
     glBindVertexArray(0);
@@ -157,13 +157,19 @@ int main(int argc, char *argv[])
         processInput(window);
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+        
         glBindVertexArray(VAO);
+
         glActiveTexture(GL_TEXTURE0);
         texture1.bind();
         glActiveTexture(GL_TEXTURE1);
         texture2.bind();
+
         shader.use();
+        glm::mat4 transform = glm::mat4(1.0);
+        transform = glm::translate(transform, glm::vec3(0.5, -0.5, 0.0));
         shader.setFloat("mixAlpha", mixValue);
+        shader.setMat4("transform", transform);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)0);
         glfwSwapBuffers(window);
         glfwPollEvents();

@@ -3,7 +3,6 @@
 out vec4 color;
 
 in vec2 uvCoords;
-in vec3 ourColor;
 
 uniform sampler2D texture1;
 uniform sampler2D texture2;

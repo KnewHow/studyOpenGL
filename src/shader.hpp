@@ -2,6 +2,7 @@
 
 #include <string>
 #include <glad/glad.h>
+#include <matrix.hpp>
 
 class Shader {
 public:
@@ -22,6 +23,7 @@ public:
     void setBool(const std::string& name, bool v) const; // set bool uniform variable 
     void setInt(const std::string name, int v) const; // set int uniform variable
     void setFloat(const std::string& name, float v) const;
+    void setMat4(const std::string& name, const glm::mat4& mat) const;
     
     inline void destory() const { glDeleteProgram(program); } 
 
