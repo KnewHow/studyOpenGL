@@ -167,11 +167,19 @@ int main(int argc, char *argv[])
 
         shader.use();
         glm::mat4 t = glm::mat4(1.0);
-        t = glm::rotate(t, (float)glfwGetTime(), glm::vec3(0, 0, 1));
         t = glm::translate(t, glm::vec3(0.5, -0.5, 0.0));
+        t = glm::rotate(t, (float)glfwGetTime(), glm::vec3(0,0,1));
         shader.setFloat("mixAlpha", mixValue);
         shader.setMat4("transform", t);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)0);
+        
+        t = glm::mat4(1.0);
+        t = glm::translate(t, glm::vec3(-0.5, 0.5, 0));
+        float scale = std::sin(glfwGetTime());
+        t = glm::scale(t, glm::vec3(scale, scale, scale));
+        shader.setMat4("transform", t);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)0);
+        
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
