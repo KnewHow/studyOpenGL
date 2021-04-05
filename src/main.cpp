@@ -6,6 +6,7 @@
 #include <vec3.hpp>
 #include <matrix.hpp>
 #include <gtc/matrix_transform.hpp>
+#include <gtx/string_cast.hpp>
 
 #include "shader.hpp"
 #include "texture.hpp"
@@ -151,13 +152,12 @@ int main(int argc, char *argv[])
     shader.use();
     shader.setInt("texture1", 0);
     shader.setInt("texture2", 1);
-    
+    // don't run too long time, the memory will be customed 
     while (!glfwWindowShouldClose(window))
     {
         processInput(window);
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        
         glBindVertexArray(VAO);
 
         glActiveTexture(GL_TEXTURE0);
@@ -166,10 +166,11 @@ int main(int argc, char *argv[])
         texture2.bind();
 
         shader.use();
-        glm::mat4 transform = glm::mat4(1.0);
-        transform = glm::translate(transform, glm::vec3(0.5, -0.5, 0.0));
+        glm::mat4 t = glm::mat4(1.0);
+        t = glm::rotate(t, (float)glfwGetTime(), glm::vec3(0, 0, 1));
+        t = glm::translate(t, glm::vec3(0.5, -0.5, 0.0));
         shader.setFloat("mixAlpha", mixValue);
-        shader.setMat4("transform", transform);
+        shader.setMat4("transform", t);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)0);
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -177,7 +178,6 @@ int main(int argc, char *argv[])
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     shader.destory();
-    glm::vec3 v = glm::vec3(1, 2,3);
     glfwDestroyWindow(window);
     glfwTerminate();
     return 0;
