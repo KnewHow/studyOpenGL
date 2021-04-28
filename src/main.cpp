@@ -7,6 +7,7 @@
 #include <matrix.hpp>
 #include <gtc/matrix_transform.hpp>
 #include <gtx/string_cast.hpp>
+#include <vector>
 
 #include "shader.hpp"
 #include "texture.hpp"
@@ -154,6 +155,19 @@ int main(int argc, char *argv[])
         -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
     };
 
+    std::vector<glm::vec3> cubePoisions = {
+        glm::vec3( 0.0f,  0.0f,  0.0f), 
+        glm::vec3( 2.0f,  5.0f, -15.0f), 
+        glm::vec3(-1.5f, -2.2f, -2.5f),  
+        glm::vec3(-3.8f, -2.0f, -12.3f),  
+        glm::vec3( 2.4f, -0.4f, -3.5f),  
+        glm::vec3(-1.7f,  3.0f, -7.5f),  
+        glm::vec3( 1.3f, -2.0f, -2.5f),  
+        glm::vec3( 1.5f,  2.0f, -2.5f), 
+        glm::vec3( 1.5f,  0.2f, -1.5f), 
+        glm::vec3(-1.3f,  1.0f, -1.5f)  
+    };
+
 
     GLuint indices[] = {
         0, 1, 3,
@@ -201,24 +215,28 @@ int main(int argc, char *argv[])
         glActiveTexture(GL_TEXTURE1);
         texture2.bind();
 
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
-
         glm::mat4 view = glm::mat4(1.0f);
         view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
 
         glm::mat4 projection;
-        projection = glm::perspective(glm::radians(45.0f), (float)width / height, 0.1f, 100.0f);
+        projection = glm::perspective(glm::radians(90.0f), 1.5f, 0.1f, 100.0f);
 
         shader.use();
         shader.setFloat("mixAlpha", mixValue);
-        shader.setMat4("model", model);
         shader.setMat4("view", view);
         shader.setMat4("projection", projection);
         shader.setInt("texture1", 0);
         shader.setInt("texture2", 1);
-
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        for(int i = 0; i < cubePoisions.size(); i++) {
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, cubePoisions[i]);
+            float angle = i * 20.0f;
+            if(i % 3 == 0) 
+                angle = 25.0f * glfwGetTime();
+            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+            shader.setMat4("model", model);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
