@@ -215,11 +215,18 @@ int main(int argc, char *argv[])
         glActiveTexture(GL_TEXTURE1);
         texture2.bind();
 
-        glm::mat4 view = glm::mat4(1.0f);
-        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+        glm::mat4 view;
+        const float radius = 10.0f;
+        float camX = std::sin(glfwGetTime()) * radius;
+        float camZ = std::cos(glfwGetTime()) * radius;
+        view = glm::lookAt(
+            glm::vec3(camX, 0.0, camZ),
+            glm::vec3(0.0, 0.0, 0.0),
+            glm::vec3(0.0, 1.0, 0.0)
+        );
 
         glm::mat4 projection;
-        projection = glm::perspective(glm::radians(90.0f), 1.5f, 0.1f, 100.0f);
+        projection = glm::perspective(glm::radians(45.0f), (float)width/height, 0.1f, 100.0f);
 
         shader.use();
         shader.setFloat("mixAlpha", mixValue);
@@ -231,8 +238,6 @@ int main(int argc, char *argv[])
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, cubePoisions[i]);
             float angle = i * 20.0f;
-            if(i % 3 == 0) 
-                angle = 25.0f * glfwGetTime();
             model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
             shader.setMat4("model", model);
             glDrawArrays(GL_TRIANGLES, 0, 36);
