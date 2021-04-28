@@ -17,11 +17,66 @@ const int height = 768;
 
 float mixValue = 0.2;
 
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+float fov = 45.0;
+
+bool firstMouse = true;
+float lastX = width / 2.0f;
+float lastY = height / 2.0f;
+float pitch = 0.0f;
+float yaw = -90.0f;
+
+float deltaTime = 0.0f;
+float lastFrame = 0.0f;
+
 namespace
 {
     void errorCallback(int error, const char *description)
     {
         fprintf(stderr, "GLFW error %d: %s\n", error, description);
+    }
+
+    void mouse_scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+        fov -= yoffset;
+        if(fov < 1.0f)
+            fov = 1.0f;
+        if(fov > 45.0f)
+            fov = 45.0f;
+    }
+
+    void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+        if(firstMouse) {
+            lastX = xpos;
+            lastY = ypos;
+            firstMouse = false;
+        }
+
+        float xOffset = xpos - lastX;
+        float yOffset = lastY - ypos;
+
+        lastX = xpos;
+        lastY = ypos;
+
+        float sensitivity = 0.1;
+        xOffset *= sensitivity;
+        yOffset *= sensitivity;
+
+        yaw += xOffset;
+        pitch += yOffset;
+
+        if(pitch > 89.0)
+            pitch = 89.0;
+        if(pitch < -89.0)
+            pitch = -89.0;
+        
+        glm::vec3 direction;
+        direction.x = std::cos(glm::radians(yaw)) * std::cos(glm::radians(pitch));
+        direction.y = std::sin(glm::radians(pitch));
+        direction.z = std::sin(glm::radians(yaw)) * std::cos(glm::radians(pitch));
+        cameraFront = glm::normalize(direction);
+
     }
 
     /**
@@ -35,6 +90,7 @@ namespace
      * deal with input from user
     */
     void processInput(GLFWwindow* window) {
+        const float cameraSpeed = 2.5 * deltaTime;
         if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
             glfwSetWindowShouldClose(window, true);
         } else if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
@@ -47,7 +103,16 @@ namespace
             if(mixValue > 1.0f) {
                 mixValue = 1.0f;
             }
+        } else if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+           cameraPos += cameraFront * cameraSpeed;
+        } else if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+           cameraPos -= cameraFront * cameraSpeed;
+        } else if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+            cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+        } else if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+            cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
         }
+        //cameraPos.y = 0; // don't fly
     }
 
     GLFWwindow *initialize()
@@ -98,6 +163,9 @@ int main(int argc, char *argv[])
     }
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, mouse_scroll_callback);
 
     std::string vertex_shader_path = "../shader/vertex.glsl";
     std::string fragment_shader_path = "../shader/fragment.glsl";
@@ -206,6 +274,12 @@ int main(int argc, char *argv[])
     while (!glfwWindowShouldClose(window))
     {
         processInput(window);
+
+        // calculate frame interval
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
+
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glBindVertexArray(VAO);
@@ -216,17 +290,10 @@ int main(int argc, char *argv[])
         texture2.bind();
 
         glm::mat4 view;
-        const float radius = 10.0f;
-        float camX = std::sin(glfwGetTime()) * radius;
-        float camZ = std::cos(glfwGetTime()) * radius;
-        view = glm::lookAt(
-            glm::vec3(camX, 0.0, camZ),
-            glm::vec3(0.0, 0.0, 0.0),
-            glm::vec3(0.0, 1.0, 0.0)
-        );
-
+        view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+        
         glm::mat4 projection;
-        projection = glm::perspective(glm::radians(45.0f), (float)width/height, 0.1f, 100.0f);
+        projection = glm::perspective(glm::radians(fov), (float)width/height, 0.1f, 100.0f);
 
         shader.use();
         shader.setFloat("mixAlpha", mixValue);
@@ -250,5 +317,6 @@ int main(int argc, char *argv[])
     shader.destory();
     glfwDestroyWindow(window);
     glfwTerminate();
+    std::cout << "fps:" << (int)(1 / deltaTime) << std::endl;
     return 0;
 }
