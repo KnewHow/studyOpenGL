@@ -152,6 +152,15 @@ int main(int argc, char *argv[])
     shader.use();
     shader.setInt("texture1", 0);
     shader.setInt("texture2", 1);
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+    glm::mat4 view = glm::mat4(1.0f);
+    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+
+    glm::mat4 projection;
+    projection = glm::perspective(glm::radians(45.0f), (float)width / height, 0.1f, 100.0f);
+
     // don't run too long time, the memory will be customed 
     while (!glfwWindowShouldClose(window))
     {
@@ -159,27 +168,19 @@ int main(int argc, char *argv[])
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
         glBindVertexArray(VAO);
-
+        
         glActiveTexture(GL_TEXTURE0);
         texture1.bind();
         glActiveTexture(GL_TEXTURE1);
         texture2.bind();
 
         shader.use();
-        glm::mat4 t = glm::mat4(1.0);
-        t = glm::translate(t, glm::vec3(0.5, -0.5, 0.0));
-        t = glm::rotate(t, (float)glfwGetTime(), glm::vec3(0,0,1));
         shader.setFloat("mixAlpha", mixValue);
-        shader.setMat4("transform", t);
+        shader.setMat4("model", model);
+        shader.setMat4("view", view);
+        shader.setMat4("projection", projection);
+
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)0);
-        
-        t = glm::mat4(1.0);
-        t = glm::translate(t, glm::vec3(-0.5, 0.5, 0));
-        float scale = std::sin(glfwGetTime());
-        t = glm::scale(t, glm::vec3(scale, scale, scale));
-        shader.setMat4("transform", t);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)0);
-        
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
