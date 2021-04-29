@@ -45,9 +45,7 @@ public:
     {
         updateCameraVectors();
     }
-    ~Camera(){
-        //std::cout << "world up" << glm::to_string(up) << std::endl;
-    }
+    ~Camera(){}
 
     /**
      * process camera movement
