@@ -1,32 +1,30 @@
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+#include "glad/glad.h"
+#include "GLFW/glfw3.h"
+
 #include <stdio.h>
 #include <iostream>
 #include <cmath>
-#include <vec3.hpp>
-#include <matrix.hpp>
-#include <gtc/matrix_transform.hpp>
-#include <gtx/string_cast.hpp>
 #include <vector>
 
+#include "vec3.hpp"
+#include "matrix.hpp"
+#include "gtc/matrix_transform.hpp"
+#include "gtx/string_cast.hpp"
 #include "shader.hpp"
 #include "texture.hpp"
+#include "camera.hpp"
 
 const int width = 1366;
 const int height = 768;
 
 float mixValue = 0.2;
 
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
-glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
-float fov = 45.0;
+Camera _camera(glm::vec3(0.0f, 0.0f, 3.0f));
+
 
 bool firstMouse = true;
 float lastX = width / 2.0f;
 float lastY = height / 2.0f;
-float pitch = 0.0f;
-float yaw = -90.0f;
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
@@ -39,11 +37,7 @@ namespace
     }
 
     void mouse_scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
-        fov -= yoffset;
-        if(fov < 1.0f)
-            fov = 1.0f;
-        if(fov > 45.0f)
-            fov = 45.0f;
+       _camera.processZoom(yoffset);
     }
 
     void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
@@ -58,25 +52,7 @@ namespace
 
         lastX = xpos;
         lastY = ypos;
-
-        float sensitivity = 0.1;
-        xOffset *= sensitivity;
-        yOffset *= sensitivity;
-
-        yaw += xOffset;
-        pitch += yOffset;
-
-        if(pitch > 89.0)
-            pitch = 89.0;
-        if(pitch < -89.0)
-            pitch = -89.0;
-        
-        glm::vec3 direction;
-        direction.x = std::cos(glm::radians(yaw)) * std::cos(glm::radians(pitch));
-        direction.y = std::sin(glm::radians(pitch));
-        direction.z = std::sin(glm::radians(yaw)) * std::cos(glm::radians(pitch));
-        cameraFront = glm::normalize(direction);
-
+        _camera.processLookAround(xOffset, yOffset, true);
     }
 
     /**
@@ -104,13 +80,13 @@ namespace
                 mixValue = 1.0f;
             }
         } else if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-           cameraPos += cameraFront * cameraSpeed;
+            _camera.processMovement(camera::Movement::FORWARD, deltaTime);
         } else if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-           cameraPos -= cameraFront * cameraSpeed;
+           _camera.processMovement(camera::Movement::BACKWARD, deltaTime);
         } else if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-            cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+            _camera.processMovement(camera::Movement::LEFT, deltaTime);
         } else if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-            cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+            _camera.processMovement(camera::Movement::RIGHT, deltaTime);
         }
         //cameraPos.y = 0; // don't fly
     }
@@ -290,10 +266,10 @@ int main(int argc, char *argv[])
         texture2.bind();
 
         glm::mat4 view;
-        view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+        view = _camera.getViewMat();
         
         glm::mat4 projection;
-        projection = glm::perspective(glm::radians(fov), (float)width/height, 0.1f, 100.0f);
+        projection = glm::perspective(glm::radians(_camera.getZoom()), (float)width/height, 0.1f, 100.0f);
 
         shader.use();
         shader.setFloat("mixAlpha", mixValue);
