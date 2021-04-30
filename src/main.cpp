@@ -259,9 +259,21 @@ int main(int argc, char *argv[])
         glBindVertexArray(objects_vao);
         objects_shader.use();
         model = glm::mat4(1.0f);
-        objects_shader.setVec3f("objectColor", 1.0f, 0.5f, 0.31f);
-        objects_shader.setVec3f("lightColor", 1.0f, 1.0f, 1.0f);
-        objects_shader.setVec3f("lightPosition", lightPos);
+        glm::vec3 lightColor;
+        lightColor.x = std::sin(glfwGetTime() * 2.0);
+        lightColor.y = std::sin(glfwGetTime() * 0.7);
+        lightColor.z = std::sin(glfwGetTime() * 1.3);
+
+        objects_shader.setVec3f("light.position", lightPos);
+        objects_shader.setVec3f("light.ambient", lightColor * 0.2f);
+        objects_shader.setVec3f("light.diffuse", lightColor * 0.5f);
+        objects_shader.setVec3f("light.specular", 1.0f, 1.0f, 1.0f);
+
+        objects_shader.setVec3f("material.ambient", 1.0f, 0.5f, 0.31f);
+        objects_shader.setVec3f("material.diffuse", 1.0f, 0.5f, 0.31f);
+        objects_shader.setVec3f("material.specular", 0.5f, 0.5f, 0.5f);
+        objects_shader.setFloat("material.shininess", 32.0f);
+        
         objects_shader.setMat4("model", model);
         objects_shader.setMat4("view", view);
         objects_shader.setMat4("projection", projection);
