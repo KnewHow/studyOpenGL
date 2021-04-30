@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "gtc/type_ptr.hpp"
-#include "debugGL.hpp"
+//#include "debugGL.hpp"
 
 
 
@@ -80,6 +80,10 @@ GLuint Shader::createProgram() {
     glDeleteShader(vertex_shader);
     glDeleteShader(fragment_shader);
     return program;
+}
+
+void Shader::setVec3f(const std::string& name, const glm::vec3& v) const {
+    setVec3f(name, v.x, v.y, v.z);
 }
 
 void Shader::setVec3f(const std::string& name, float x, float y, float z) const {
