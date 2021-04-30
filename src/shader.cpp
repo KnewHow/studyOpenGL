@@ -4,7 +4,11 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
-#include <gtc/type_ptr.hpp>
+
+#include "gtc/type_ptr.hpp"
+#include "debugGL.hpp"
+
+
 
 Shader::Shader(const std::string& v_path, const std::string& f_path)
     :vertex_shader_path(v_path), fragment_shader_path(f_path)
@@ -78,9 +82,14 @@ GLuint Shader::createProgram() {
     return program;
 }
 
+void Shader::setVec3f(const std::string& name, float x, float y, float z) const {
+    glUniform3f(glGetUniformLocation(program, name.c_str()), x, y, z);
+}
+
 void Shader::setVec4f(const std::string& name, float x, float y, float z, float w) const {
     glUniform4f(glGetUniformLocation(program, name.c_str()), x, y, z, w);
 }
+
 
 void Shader::setBool(const std::string& name, bool v) const {
     glUniform1i(glGetUniformLocation(program, name.c_str()), (int)v);

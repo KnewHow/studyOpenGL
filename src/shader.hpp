@@ -14,6 +14,7 @@ public:
     ~Shader();
     inline GLuint getProgram() const { return program; }
     inline void use() const { glUseProgram(program); }
+    void setVec3f(const std::string& name, float x, float y, float z) const;
     /**
      * set uniform vec4f 
      * @param name the name of uniform variable
