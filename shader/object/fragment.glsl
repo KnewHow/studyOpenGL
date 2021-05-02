@@ -38,6 +38,7 @@ void main(void) {
     vec3 reflect_dir = reflect(-ray_dir, N);
     float spec = pow(max(dot(view_dir, reflect_dir), 0.0), material.shininess);
     vec3 specular = light.specular * (spec * vec3(texture(material.specular, texCoords)));
+    // vec3 specular = light.specular * (spec * (vec3(1.0) - vec3(texture(material.specular, texCoords)))); // invert the specular
 
     vec3 result = specular + ambient + diffuse;
     color = vec4(result, 1.0);

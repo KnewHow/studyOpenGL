@@ -149,6 +149,7 @@ int main(int argc, char *argv[])
 
     Texture diffuse_texture("../res/texture/container2.png", GL_RGBA, false);
     Texture specular_texture("../res/texture/container2_specular.png", GL_RGBA, false);
+    // Texture specular_texture("../res/texture/lighting_maps_specular_color.png", GL_RGBA, false); // with colorful specular 
     
     GLfloat vertices[] = {
        // positions          // normals        // texture coords
