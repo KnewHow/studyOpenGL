@@ -148,7 +148,8 @@ int main(int argc, char *argv[])
     std::cout << "object program: " << objects_shader.getProgram() << ", light program: " << light_shader.getProgram() << std::endl;
 
     Texture diffuse_texture("../res/texture/container2.png", GL_RGBA, false);
-    diffuse_texture.setFilterMode(GL_LINE);
+    Texture specular_texture("../res/texture/container2_specular.png", GL_RGBA, false);
+    
     GLfloat vertices[] = {
        // positions          // normals        // texture coords
     -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
@@ -249,8 +250,8 @@ int main(int argc, char *argv[])
         glm::mat4 projection;
         projection = glm::perspective(glm::radians(_camera.getZoom()), (float)width/height, 0.1f, 100.0f);
 
-    //    lightPos.x = 1.0f + sin(glfwGetTime()) * 2.0f;
-    //    lightPos.y = sin(glfwGetTime() / 2.0f) * 1.0f;
+       lightPos.x = 1.0f + sin(glfwGetTime()) * 2.0f;
+       lightPos.y = sin(glfwGetTime() / 2.0f) * 1.0f;
 
         glBindVertexArray(light_vao);
         light_shader.use();
@@ -272,7 +273,12 @@ int main(int argc, char *argv[])
         // lightColor.z = std::sin(glfwGetTime() * 1.3);
         objects_shader.setInt("material.diffuse", 0);
         glActiveTexture(GL_TEXTURE0);
-        diffuse_texture.bind();
+        diffuse_texture.bind(); // bind diffuse specular
+
+        objects_shader.setInt("material.specular", 1);
+        glActiveTexture(GL_TEXTURE1);
+        specular_texture.bind(); // bind specular texture
+
         objects_shader.setVec3f("light.position", lightPos);
         objects_shader.setVec3f("light.ambient", lightColor * 0.2f);
         objects_shader.setVec3f("light.diffuse", lightColor * 0.5f);
