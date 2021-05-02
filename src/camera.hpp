@@ -120,6 +120,10 @@ public:
         return position;
     }
 
+    inline glm::vec3 getFront() {
+        return front;
+    }
+
 private:
     void updateCameraVectors() {
         glm::vec3 direction;

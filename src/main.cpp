@@ -273,14 +273,17 @@ int main(int argc, char *argv[])
         light_shader.setMat4("model", model);
         light_shader.setMat4("view", view);
         light_shader.setMat4("projection", projection);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        //glDrawArrays(GL_TRIANGLES, 0, 36);
         
         
         glBindVertexArray(objects_vao);
         objects_shader.use();
 
         glm::vec3 lightColor = glm::vec3(1, 1, 1);
-        objects_shader.setVec3f("light.position", lightPos);
+        objects_shader.setVec3f("light.position", _camera.getPosition());
+        objects_shader.setVec3f("light.direction", _camera.getFront());
+        objects_shader.setFloat("light.cutOff", std::cos(glm::radians(12.5f)));
+        objects_shader.setFloat("light.outerCutOff", std::cos(glm::radians(17.5f)));
         objects_shader.setVec3f("light.ambient", lightColor * 0.2f);
         objects_shader.setVec3f("light.diffuse", lightColor * 0.5f);
         objects_shader.setVec3f("light.specular", 1.0f, 1.0f, 1.0f);
