@@ -1,10 +1,9 @@
 #include "texture.hpp"
 
+#include <iostream>
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
-
-
-
 
 Texture::Texture(const std::string& p) 
     :width(0), height(0), nrChannels(0), ID(0), data(nullptr), path(p), format(GL_RGB), isFlipVertically(false), wrappingMode(GL_REPEAT), filterMode(GL_LINE)
@@ -37,10 +36,8 @@ Texture::~Texture() {
 }
 
 void Texture::bind() {
-    if(data != nullptr) {
-        glGenTextures(1, &ID);
+    if(ID != 0) {
         glBindTexture(GL_TEXTURE_2D, ID);
-
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrappingMode);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrappingMode);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterMode);
@@ -66,6 +63,11 @@ void Texture::freeData() {
 void Texture::loadTexture() {
     stbi_set_flip_vertically_on_load(isFlipVertically); 
     data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
+    if(data != nullptr) {
+        glGenTextures(1, &ID);
+    } else {
+        std::cout << "load texture failure, path: " << path << std::endl;
+    }
 }
 
 void Texture::setWrappingMode(GLint wrapping) {
