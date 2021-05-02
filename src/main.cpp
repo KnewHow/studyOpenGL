@@ -249,8 +249,8 @@ int main(int argc, char *argv[])
         glm::mat4 projection;
         projection = glm::perspective(glm::radians(_camera.getZoom()), (float)width/height, 0.1f, 100.0f);
 
-       lightPos.x = 1.0f + sin(glfwGetTime()) * 2.0f;
-       lightPos.y = sin(glfwGetTime() / 2.0f) * 1.0f;
+    //    lightPos.x = 1.0f + sin(glfwGetTime()) * 2.0f;
+    //    lightPos.y = sin(glfwGetTime() / 2.0f) * 1.0f;
 
         glBindVertexArray(light_vao);
         light_shader.use();
