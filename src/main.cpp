@@ -149,8 +149,6 @@ int main(int argc, char *argv[])
 
     Texture diffuse_texture("../res/texture/container2.png", GL_RGBA, false);
     Texture specular_texture("../res/texture/container2_specular.png", GL_RGBA, false);
-    // Texture specular_texture("../res/texture/lighting_maps_specular_color.png", GL_RGBA, false); // with colorful specular 
-    Texture emission_texture("../res/texture/matrix.jpg");
     
     GLfloat vertices[] = {
        // positions          // normals        // texture coords
@@ -195,6 +193,19 @@ int main(int argc, char *argv[])
      0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
     -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
     -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
+    };
+
+    std::vector<glm::vec3> cubePositions = {
+        glm::vec3( 0.0f,  0.0f,  0.0f),
+        glm::vec3( 2.0f,  5.0f, -15.0f),
+        glm::vec3(-1.5f, -2.2f, -2.5f),
+        glm::vec3(-3.8f, -2.0f, -12.3f),
+        glm::vec3( 2.4f, -0.4f, -3.5f),
+        glm::vec3(-1.7f,  3.0f, -7.5f),
+        glm::vec3( 1.3f, -2.0f, -2.5f),
+        glm::vec3( 1.5f,  2.0f, -2.5f),
+        glm::vec3( 1.5f,  0.2f, -1.5f),
+        glm::vec3(-1.3f,  1.0f, -1.5f)
     };
 
     glm::vec3 lightPos = glm::vec3(1.2, 1.0, 2.0);
@@ -252,8 +263,8 @@ int main(int argc, char *argv[])
         glm::mat4 projection;
         projection = glm::perspective(glm::radians(_camera.getZoom()), (float)width/height, 0.1f, 100.0f);
 
-       lightPos.x = 1.0f + sin(glfwGetTime()) * 2.0f;
-       lightPos.y = sin(glfwGetTime() / 2.0f) * 1.0f;
+    //    lightPos.x = 1.0f + sin(glfwGetTime()) * 2.0f;
+    //    lightPos.y = sin(glfwGetTime() / 2.0f) * 1.0f;
 
         glBindVertexArray(light_vao);
         light_shader.use();
@@ -268,11 +279,15 @@ int main(int argc, char *argv[])
         glBindVertexArray(objects_vao);
         objects_shader.use();
 
-        model = glm::mat4(1.0f);
         glm::vec3 lightColor = glm::vec3(1, 1, 1);
-        // lightColor.x = std::sin(glfwGetTime() * 2.0);
-        // lightColor.y = std::sin(glfwGetTime() * 0.7);
-        // lightColor.z = std::sin(glfwGetTime() * 1.3);
+        objects_shader.setVec3f("light.position", lightPos);
+        objects_shader.setVec3f("light.ambient", lightColor * 0.2f);
+        objects_shader.setVec3f("light.diffuse", lightColor * 0.5f);
+        objects_shader.setVec3f("light.specular", 1.0f, 1.0f, 1.0f);
+        objects_shader.setFloat("light.constant", 1.0f);
+        objects_shader.setFloat("light.linear", 0.09f);
+        objects_shader.setFloat("light.quadratic", 0.032f);
+
         objects_shader.setInt("material.diffuse", 0);
         glActiveTexture(GL_TEXTURE0);
         diffuse_texture.bind(); // bind diffuse specular
@@ -280,26 +295,20 @@ int main(int argc, char *argv[])
         objects_shader.setInt("material.specular", 1);
         glActiveTexture(GL_TEXTURE1);
         specular_texture.bind(); // bind specular texture
-
-        objects_shader.setInt("material.emission", 2);
-        glActiveTexture(GL_TEXTURE2);
-        emission_texture.bind();
-
-        objects_shader.setVec3f("light.position", lightPos);
-        objects_shader.setVec3f("light.ambient", lightColor * 0.2f);
-        objects_shader.setVec3f("light.diffuse", lightColor * 0.5f);
-        objects_shader.setVec3f("light.specular", 1.0f, 1.0f, 1.0f);
-
         objects_shader.setVec3f("material.specular", 0.5f, 0.5f, 0.5f);
         objects_shader.setFloat("material.shininess", 32.0f);
-        
-        objects_shader.setMat4("model", model);
+    
         objects_shader.setMat4("view", view);
         objects_shader.setMat4("projection", projection);
         objects_shader.setVec3f("viewerPosition", _camera.getPosition());
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        diffuse_texture.unbind();
-
+        for(int i = 0; i < cubePositions.size(); i++) {
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, cubePositions[i]);
+            float angle = 20 * i;
+            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+            objects_shader.setMat4("model", model);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
@@ -307,6 +316,9 @@ int main(int argc, char *argv[])
     glDeleteVertexArrays(1, &objects_vao);
     glDeleteVertexArrays(1, &light_vao);
     glDeleteBuffers(1, &VBO);
+
+    specular_texture.unbind();
+    diffuse_texture.unbind();
     
     objects_shader.destory();
     light_shader.destory();
