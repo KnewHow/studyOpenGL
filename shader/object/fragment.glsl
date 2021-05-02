@@ -3,6 +3,7 @@
 struct Material {
     sampler2D diffuse;
     sampler2D specular;
+    sampler2D emission;
     float shininess;
 };
 
@@ -40,6 +41,7 @@ void main(void) {
     vec3 specular = light.specular * (spec * vec3(texture(material.specular, texCoords)));
     // vec3 specular = light.specular * (spec * (vec3(1.0) - vec3(texture(material.specular, texCoords)))); // invert the specular
 
-    vec3 result = specular + ambient + diffuse;
+    vec3 emission = texture(material.emission, texCoords).rgb;
+    vec3 result = emission + specular + ambient + diffuse;
     color = vec4(result, 1.0);
 }

@@ -150,6 +150,7 @@ int main(int argc, char *argv[])
     Texture diffuse_texture("../res/texture/container2.png", GL_RGBA, false);
     Texture specular_texture("../res/texture/container2_specular.png", GL_RGBA, false);
     // Texture specular_texture("../res/texture/lighting_maps_specular_color.png", GL_RGBA, false); // with colorful specular 
+    Texture emission_texture("../res/texture/matrix.jpg");
     
     GLfloat vertices[] = {
        // positions          // normals        // texture coords
@@ -279,6 +280,10 @@ int main(int argc, char *argv[])
         objects_shader.setInt("material.specular", 1);
         glActiveTexture(GL_TEXTURE1);
         specular_texture.bind(); // bind specular texture
+
+        objects_shader.setInt("material.emission", 2);
+        glActiveTexture(GL_TEXTURE2);
+        emission_texture.bind();
 
         objects_shader.setVec3f("light.position", lightPos);
         objects_shader.setVec3f("light.ambient", lightColor * 0.2f);
