@@ -215,6 +215,13 @@ int main(int argc, char *argv[])
         glm::vec3( 0.0f,  0.0f, -3.0f)
     };
 
+    std::vector<glm::vec3> pointLightColors = {
+        glm::vec3(1.0f, 0.6f, 0.0f),
+        glm::vec3(1.0f, 0.0f, 0.0f),
+        glm::vec3(1.0f, 1.0, 0.0),
+        glm::vec3(0.2f, 0.2f, 1.0f)
+    };
+
     GLuint VBO;
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -257,7 +264,7 @@ int main(int argc, char *argv[])
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClearColor(0.75f, 0.52f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glm::mat4 model = glm::mat4(1.0f);
@@ -277,6 +284,7 @@ int main(int argc, char *argv[])
             model = glm::translate(model, pointLightPositions[i]);
             model = glm::scale(model, glm::vec3(0.2));
             light_shader.setMat4("model", model);
+            light_shader.setVec3f("lightColor", pointLightColors[i]);
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
         
@@ -284,15 +292,14 @@ int main(int argc, char *argv[])
         glBindVertexArray(objects_vao);
         objects_shader.use();
 
-        glm::vec3 lightColor = glm::vec3(1, 1, 1);
 
         objects_shader.setVec3f("spotLight.position", _camera.getPosition());
         objects_shader.setVec3f("spotLight.direction", _camera.getFront());
         objects_shader.setFloat("spotLight.cutOff", std::cos(glm::radians(12.5f)));
-        objects_shader.setFloat("spotLight.outerCutOff", std::cos(glm::radians(17.5f)));
-        objects_shader.setVec3f("spotLight.ambient", lightColor * 0.2f);
-        objects_shader.setVec3f("spotLight.diffuse", lightColor * 0.5f);
-        objects_shader.setVec3f("spotLight.specular", lightColor);
+        objects_shader.setFloat("spotLight.outerCutOff", std::cos(glm::radians(13.5f)));
+        objects_shader.setVec3f("spotLight.ambient", 0.0f, 0.0f, 0.0f);
+        objects_shader.setVec3f("spotLight.diffuse", 0.8f, 0.8f, 0.0f);
+        objects_shader.setVec3f("spotLight.specular", 0.8f, 0.8f, 0.0f);
         objects_shader.setFloat("spotLight.constant", 1.0f);
         objects_shader.setFloat("spotLight.linear", 0.09f);
         objects_shader.setFloat("spotLight.quadratic", 0.032f);
@@ -300,18 +307,18 @@ int main(int argc, char *argv[])
         for(int i = 0; i < pointLightPositions.size(); i++) {
             std::string point_name_prefix = "pointLights[" + std::to_string(i) + "]";
             objects_shader.setVec3f(point_name_prefix + ".position", pointLightPositions[i]);
-            objects_shader.setVec3f(point_name_prefix + ".ambient", lightColor * 0.05f);
-            objects_shader.setVec3f(point_name_prefix + ".diffuse", lightColor * 0.8f);
-            objects_shader.setVec3f(point_name_prefix + ".specular", lightColor);
+            objects_shader.setVec3f(point_name_prefix + ".ambient", pointLightColors[i] * 0.1f);
+            objects_shader.setVec3f(point_name_prefix + ".diffuse", pointLightColors[i]);
+            objects_shader.setVec3f(point_name_prefix + ".specular", pointLightColors[i]);
             objects_shader.setFloat(point_name_prefix + ".constant", 1.0f);
             objects_shader.setFloat(point_name_prefix + ".linear", 0.09f);
             objects_shader.setFloat(point_name_prefix + ".quadratic", 0.032f);
         }
 
         objects_shader.setVec3f("directionLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
-        objects_shader.setVec3f("directionLight.ambient", lightColor * 0.05f);
-        objects_shader.setVec3f("directionLight.diffuse", lightColor * 0.4f);
-        objects_shader.setVec3f("directionLight.specular", lightColor * 0.5f);
+        objects_shader.setVec3f("directionLight.ambient", 0.3f, 0.24f, 0.14f);
+        objects_shader.setVec3f("directionLight.diffuse", 0.7f, 0.42f, 0.26f);
+        objects_shader.setVec3f("directionLight.specular", 0.5f, 0.5f, 0.5f);
 
 
         objects_shader.setInt("material.diffuse", 0);
