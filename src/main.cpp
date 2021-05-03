@@ -151,48 +151,48 @@ int main(int argc, char *argv[])
     Texture specular_texture("../res/texture/container2_specular.png", GL_RGBA, false);
     
     GLfloat vertices[] = {
-       // positions          // normals        // texture coords
-    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-     0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-     0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+        // positions          // normals        // texture coords
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+        0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
+        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
 
-    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
+        0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
+        0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
+        0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
 
-    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-    -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
 
-     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+        0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+        0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+        0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+        0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
 
-    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+        0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
+        0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+        0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
 
-    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
-     0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
+        0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
+        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
     };
 
     std::vector<glm::vec3> cubePositions = {
@@ -208,7 +208,12 @@ int main(int argc, char *argv[])
         glm::vec3(-1.3f,  1.0f, -1.5f)
     };
 
-    glm::vec3 lightPos = glm::vec3(1.2, 1.0, 2.0);
+    std::vector<glm::vec3> pointLightPositions = {
+        glm::vec3( 0.7f,  0.2f,  2.0f),
+        glm::vec3( 2.3f, -3.3f, -4.0f),
+        glm::vec3(-4.0f,  2.0f, -12.0f),
+        glm::vec3( 0.0f,  0.0f, -3.0f)
+    };
 
     GLuint VBO;
     glGenBuffers(1, &VBO);
@@ -263,33 +268,51 @@ int main(int argc, char *argv[])
         glm::mat4 projection;
         projection = glm::perspective(glm::radians(_camera.getZoom()), (float)width/height, 0.1f, 100.0f);
 
-    //    lightPos.x = 1.0f + sin(glfwGetTime()) * 2.0f;
-    //    lightPos.y = sin(glfwGetTime() / 2.0f) * 1.0f;
-
         glBindVertexArray(light_vao);
         light_shader.use();
-        model = glm::translate(model, lightPos);
-        model = glm::scale(model, glm::vec3(0.2));
-        light_shader.setMat4("model", model);
         light_shader.setMat4("view", view);
         light_shader.setMat4("projection", projection);
-        //glDrawArrays(GL_TRIANGLES, 0, 36);
+        for(int i = 0; i < pointLightPositions.size(); i++) {
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, pointLightPositions[i]);
+            model = glm::scale(model, glm::vec3(0.2));
+            light_shader.setMat4("model", model);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
         
         
         glBindVertexArray(objects_vao);
         objects_shader.use();
 
         glm::vec3 lightColor = glm::vec3(1, 1, 1);
-        objects_shader.setVec3f("light.position", _camera.getPosition());
-        objects_shader.setVec3f("light.direction", _camera.getFront());
-        objects_shader.setFloat("light.cutOff", std::cos(glm::radians(12.5f)));
-        objects_shader.setFloat("light.outerCutOff", std::cos(glm::radians(17.5f)));
-        objects_shader.setVec3f("light.ambient", lightColor * 0.2f);
-        objects_shader.setVec3f("light.diffuse", lightColor * 0.5f);
-        objects_shader.setVec3f("light.specular", 1.0f, 1.0f, 1.0f);
-        objects_shader.setFloat("light.constant", 1.0f);
-        objects_shader.setFloat("light.linear", 0.09f);
-        objects_shader.setFloat("light.quadratic", 0.032f);
+
+        objects_shader.setVec3f("spotLight.position", _camera.getPosition());
+        objects_shader.setVec3f("spotLight.direction", _camera.getFront());
+        objects_shader.setFloat("spotLight.cutOff", std::cos(glm::radians(12.5f)));
+        objects_shader.setFloat("spotLight.outerCutOff", std::cos(glm::radians(17.5f)));
+        objects_shader.setVec3f("spotLight.ambient", lightColor * 0.2f);
+        objects_shader.setVec3f("spotLight.diffuse", lightColor * 0.5f);
+        objects_shader.setVec3f("spotLight.specular", lightColor);
+        objects_shader.setFloat("spotLight.constant", 1.0f);
+        objects_shader.setFloat("spotLight.linear", 0.09f);
+        objects_shader.setFloat("spotLight.quadratic", 0.032f);
+
+        for(int i = 0; i < pointLightPositions.size(); i++) {
+            std::string point_name_prefix = "pointLights[" + std::to_string(i) + "]";
+            objects_shader.setVec3f(point_name_prefix + ".position", pointLightPositions[i]);
+            objects_shader.setVec3f(point_name_prefix + ".ambient", lightColor * 0.05f);
+            objects_shader.setVec3f(point_name_prefix + ".diffuse", lightColor * 0.8f);
+            objects_shader.setVec3f(point_name_prefix + ".specular", lightColor);
+            objects_shader.setFloat(point_name_prefix + ".constant", 1.0f);
+            objects_shader.setFloat(point_name_prefix + ".linear", 0.09f);
+            objects_shader.setFloat(point_name_prefix + ".quadratic", 0.032f);
+        }
+
+        objects_shader.setVec3f("directionLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
+        objects_shader.setVec3f("directionLight.ambient", lightColor * 0.05f);
+        objects_shader.setVec3f("directionLight.diffuse", lightColor * 0.4f);
+        objects_shader.setVec3f("directionLight.specular", lightColor * 0.5f);
+
 
         objects_shader.setInt("material.diffuse", 0);
         glActiveTexture(GL_TEXTURE0);
