@@ -13,6 +13,7 @@
 #include "shader.hpp"
 #include "texture.hpp"
 #include "camera.hpp"
+#include "model/mesh.hpp"
 //#include "debugGL.hpp"
 
 const int width = 1366;
