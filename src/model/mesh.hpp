@@ -11,12 +11,25 @@
 namespace Model {
     struct Vertex
     {
+        Vertex() {
+            position = glm::vec3(0);
+            normal = glm::vec3(0);
+            texCoords = glm::vec3(0);
+            tangent = glm::vec3(0);
+            bitangent = glm::vec3(0);
+        }
         glm::vec3 position;
         glm::vec3 normal;
         glm::vec2 texCoords;
+        glm::vec3 tangent;
+        glm::vec3 bitangent;
     };
 
     struct Texture {
+        Texture() {
+            id = 0;
+            type = "";
+        }
         unsigned int id;
         std::string type;
     };
@@ -32,6 +45,8 @@ namespace Model {
         void draw(const Shader& shader) const {
             unsigned int diffuseNr = 1;
             unsigned int specularNr = 1;
+            unsigned int normalNr = 1;
+            unsigned int heightNr = 1;
             for(unsigned int i = 0; i < textures.size(); i++) {
                 glActiveTexture(GL_TEXTURE0 + i);
                 std::string number;
@@ -40,6 +55,10 @@ namespace Model {
                     number = std::to_string(diffuseNr++);
                 } else if(type == "texture_specular") {
                     number = std::to_string(specularNr++);
+                } else if(type == "texture_normal") {
+                    number = std::to_string(normalNr++);
+                } else if(type == "texture_height") {
+                     number = std::to_string(heightNr++);
                 }
                 shader.setFloat("material." + type + number, i);
                 glBindTexture(GL_TEXTURE_2D, textures[i].id);
