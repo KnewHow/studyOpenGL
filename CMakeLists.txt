@@ -7,8 +7,10 @@ set(LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib")
 set(SOURCES "${SRC_DIR}/main.cpp")
 
 file(GLOB SOURCES
-    "${SRC_DIR}/*.h"
+    "${SRC_DIR}/*.hpp"
     "${SRC_DIR}/*.cpp"
+    "${SRC_DIR}/model/*.hpp"
+    "${SRC_DIR}/model/*.cpp"
 )
 
 
@@ -42,3 +44,5 @@ target_include_directories(${PROJECT_NAME} PRIVATE "${STB_DIR}")
 # glm
 set(GLM_DIR "${LIB_DIR}/glm")
 target_include_directories(${PROJECT_NAME} PRIVATE "${GLM_DIR}/glm")
+
+target_link_libraries(${PROJECT_NAME} ${ASSIMP_LIBRARIES} -lassimp)
