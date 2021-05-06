@@ -207,6 +207,7 @@ int main(int argc, char *argv[])
     glBindVertexArray(0);
 
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_STENCIL_TEST);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -218,7 +219,10 @@ int main(int argc, char *argv[])
         lastFrame = currentFrame;
 
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+        glStencilMask(0xFF); // each bit is written to the stencil buffer as is
+        glStencilMask(0x00); 
 
         glm::mat4 model = glm::mat4(1.0f);
 
