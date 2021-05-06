@@ -16,6 +16,8 @@ public:
     ~Shader();
     inline GLuint getProgram() const { return program; }
     inline void use() const { glUseProgram(program); }
+    inline std::string getVertexShaderPath() const { return vertex_shader_path; }
+    inline std::string getFragmentShaderPath() const { return fragment_shader_path; }
     void setVec3f(const std::string& name, const glm::vec3& v) const;
     void setVec3f(const std::string& name, float x, float y, float z) const;
     /**

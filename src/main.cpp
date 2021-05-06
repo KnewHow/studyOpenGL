@@ -145,6 +145,7 @@ int main(int argc, char *argv[])
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, mouse_scroll_callback);
     Shader model_shader("../shader/model/vertex.glsl", "../shader/model/fragment.glsl");
+    Shader model_boder_shader("../shader/model/vertex.glsl", "../shader/model/border_fragment.glsl");
     Shader light_shader("../shader/light/vertex.glsl", "../shader/light/fragment.glsl");
     Model::Model ourModel("../res/model/backpack/backpack.obj");
 
@@ -207,7 +208,10 @@ int main(int argc, char *argv[])
     glBindVertexArray(0);
 
     glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
     glEnable(GL_STENCIL_TEST);
+    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -220,9 +224,6 @@ int main(int argc, char *argv[])
 
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-        glStencilMask(0xFF); // each bit is written to the stencil buffer as is
-        glStencilMask(0x00); 
 
         glm::mat4 model = glm::mat4(1.0f);
 
@@ -249,17 +250,18 @@ int main(int argc, char *argv[])
 
         model = glm::mat4(1.0);
         model_shader.use();
+        glm::vec3 lightColor = glm::vec3(1.0);
+        glStencilFunc(GL_ALWAYS, 1, 0xFF);
+        glStencilMask(0xFF);
         model_shader.setMat4("model", model);
         model_shader.setMat4("view", view);
         model_shader.setMat4("projection", projection);
 
-        glm::vec3 lightColor = glm::vec3(1.0);
         model_shader.setVec3f("directionLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
         model_shader.setVec3f("directionLight.ambient", lightColor * 0.1f);
         model_shader.setVec3f("directionLight.diffuse", lightColor * 0.7f);
         model_shader.setVec3f("directionLight.specular", lightColor * 1.0f);
     
-
         model_shader.setVec3f("pointLight.position", lightPosition);
         model_shader.setVec3f("pointLight.ambient", lightColor * 0.1f);
         model_shader.setVec3f("pointLight.diffuse", lightColor * 0.7f);
@@ -268,12 +270,24 @@ int main(int argc, char *argv[])
         model_shader.setFloat("pointLight.linear", 0.09f);
         model_shader.setFloat("pointLight.quadratic", 0.032f);
         
-        
         model_shader.setVec3f("viewerPosition", _camera.getPosition());
         
-        
         ourModel.draw(model_shader);
-    
+        
+        model_boder_shader.use();
+        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+        glStencilMask(0x00);
+        glDisable(GL_DEPTH_TEST);
+        float scale = 1.1;
+        model = glm::scale(model, glm::vec3(scale, scale, scale));
+        model_boder_shader.setMat4("model", model);
+        model_boder_shader.setMat4("view", view);
+        model_boder_shader.setMat4("projection", projection);
+        ourModel.draw(model_boder_shader);
+        
+        glStencilMask(0xFF);
+        glStencilFunc(GL_ALWAYS, 0, 0xFF);
+        glEnable(GL_DEPTH_TEST);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
