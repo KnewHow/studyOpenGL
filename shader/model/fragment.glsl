@@ -34,6 +34,9 @@ in vec2 texCoords;
 in vec3 inFragPosition;
 in vec3 inNormal;
 
+float near = 0.1;
+float far = 100.0;
+
 out vec4 color;
 
 vec3 calculateDirectionLight(DirectionLight light, vec3 normal, vec3 viewerDir) {
@@ -67,6 +70,11 @@ vec3 calculatePointLight(PointLight light, vec3 fragPosition, vec3 normal, vec3 
    return (specular + ambient + diffuse) * attenuation;
 }
 
+float getLinearDepth(float depth) {
+    float z = depth * 2.0 - 1.0; // transform depth to ndc coordinate
+    return (2 * far * near) / (far + near - z * (far - near)); // this can refer http://www.songho.ca/opengl/gl_projectionmatrix.html, in this case, we use inverse to make z is positive
+}
+
 void main() {
     vec3 res = vec3(0.0);
     vec3 normal = normalize(inNormal);
@@ -74,5 +82,6 @@ void main() {
 
     //res += calculateDirectionLight(directionLight, normal, viewerDir);
     res += calculatePointLight(pointLight, inFragPosition, normal, viewerDir);
-    color = vec4(res, 1.0);
+    float depth = getLinearDepth(gl_FragCoord.z) / (far - near);
+    color = vec4(vec3(depth), 1.0);
 }
