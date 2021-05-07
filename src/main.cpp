@@ -5,6 +5,7 @@
 #include <iostream>
 #include <cmath>
 #include <vector>
+#include <map>
 
 #include "vec3.hpp"
 #include "matrix.hpp"
@@ -207,7 +208,7 @@ int main(int argc, char *argv[])
          5.0f, -0.5f, -5.0f,  2.0f, 2.0f
     };
 
-    GLfloat grassVertices[] = {
+    GLfloat transparentVertices[] = {
         // positions         // texture Coords (swapped y coordinates because texture is flipped upside down)
         0.0f,  0.5f,  0.0f,  0.0f,  0.0f,
         0.0f, -0.5f,  0.0f,  0.0f,  1.0f,
@@ -218,7 +219,7 @@ int main(int argc, char *argv[])
         1.0f,  0.5f,  0.0f,  1.0f,  0.0f
     };
 
-    std::vector<glm::vec3> grassPositions = {
+    std::vector<glm::vec3> transparentPositions = {
         glm::vec3(-1.5f, 0.0f, -0.48f),
         glm::vec3( 1.5f, 0.0f, 0.51f),
         glm::vec3( 0.0f, 0.0f, 0.7f),
@@ -228,7 +229,7 @@ int main(int argc, char *argv[])
 
     Texture cubeTexture("../res/texture/marble.jpg");
     Texture planeTexture("../res/texture/metal.png");
-    Texture grassTexture("../res/texture/grass.png", GL_CLAMP_TO_EDGE);
+    Texture transparentTexture("../res/texture/blending_transparent_window.png", GL_CLAMP_TO_EDGE);
 
     int stride = 5 * sizeof(float);
     GLuint cubeVAO, cubeVBO;
@@ -259,13 +260,13 @@ int main(int argc, char *argv[])
     glEnableVertexAttribArray(1);
 
 
-    GLuint grassVAO, grassVBO;
-    glGenVertexArrays(1, &grassVAO);
-    glBindVertexArray(grassVAO);
+    GLuint transparentVAO, transparentVBO;
+    glGenVertexArrays(1, &transparentVAO);
+    glBindVertexArray(transparentVAO);
 
-    glGenBuffers(1, &grassVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, grassVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(grassVertices), &grassVertices, GL_STATIC_DRAW);
+    glGenBuffers(1, &transparentVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, transparentVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(transparentVertices), &transparentVertices, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
     glEnableVertexAttribArray(0);
@@ -274,6 +275,8 @@ int main(int argc, char *argv[])
 
     glBindVertexArray(0);
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC1_ALPHA);
 
     objects_shader.setInt("texture1", 0);
     while (!glfwWindowShouldClose(window))
@@ -316,11 +319,17 @@ int main(int argc, char *argv[])
         objects_shader.setMat4("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
-        glBindVertexArray(grassVAO);
-        grassTexture.bind();
-        for(int i = 0; i < grassPositions.size(); i++) {
+        std::map<float, glm::vec3> sortedWindows;
+        for(const auto& window: transparentPositions) {
+            float distance = glm::length(window - _camera.getPosition());
+            sortedWindows[distance] = window;
+        }
+
+        glBindVertexArray(transparentVAO);
+        transparentTexture.bind();
+        for(auto it = sortedWindows.rbegin(); it != sortedWindows.rend(); it++) {
             model = glm::mat4(1.0f);
-            model = glm::translate(model, grassPositions[i]);
+            model = glm::translate(model, it->second);
             objects_shader.setMat4("model", model);
             glDrawArrays(GL_TRIANGLES, 0, 6);
         }
