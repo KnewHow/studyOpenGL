@@ -14,7 +14,7 @@
 #include "texture.hpp"
 #include "camera.hpp"
 #include "cubemap.hpp"
-//#include "debugGL.hpp"
+#include "model/model.hpp"
 
 const int width = 1366;
 const int height = 768;
@@ -146,56 +146,14 @@ int main(int argc, char *argv[])
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, mouse_scroll_callback);
 
-    Shader objects_shader("../shader/object/vertex.glsl", "../shader/object/fragment.glsl");
+    Model::Model ourModel("../res/model/backpack/backpack.obj");
+    Shader model_shader("../shader/model/vertex.glsl", "../shader/model/fragment.glsl");
+
     Shader cubemap_shader("../shader/cubemap/vertex.glsl", "../shader/cubemap/fragment.glsl");
     
-    Texture cubeTexture("../res/texture/container.jpg");
     Cubemap cubemapTex("../res/texture/cubemap/skybox");
 
-    GLfloat cubeVertices[] = {
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-        0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 
-        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 
-        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 
-        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 
-
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-        0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-        0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-        0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-
-        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-        0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-        0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-        0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-        0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-        0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-        0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-        0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-        0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
-    };
-
+    
     GLfloat cubemapVertices[] = {
         // positions          
         -1.0f,  1.0f, -1.0f,
@@ -242,23 +200,6 @@ int main(int argc, char *argv[])
     };
 
 
-    GLuint cube_vbo;
-    glGenBuffers(1, &cube_vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, cube_vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), cubeVertices, GL_STATIC_DRAW);
-    
-    GLsizei stride = 6 * sizeof(float);
-
-    GLuint objects_vao;
-    glGenVertexArrays(1, &objects_vao);
-    glBindVertexArray(objects_vao);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
-    glEnableVertexAttribArray(0); // bind position
-
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1); // bind normal
-
-
     GLuint cubemapVAO, cubemapVBO;
     glGenVertexArrays(1, &cubemapVAO);
     glBindVertexArray(cubemapVAO);
@@ -294,19 +235,15 @@ int main(int argc, char *argv[])
         glm::mat4 projection;
         projection = glm::perspective(glm::radians(_camera.getZoom()), (float)width/height, 0.1f, 100.0f);
         
-        glBindVertexArray(objects_vao);
-        objects_shader.use();
-        objects_shader.setInt("texture1", 0);
+        model_shader.use();
+        model_shader.setMat4("model", model);
+        model_shader.setMat4("view", view);
+        model_shader.setMat4("projection", projection);
+        model_shader.setVec3f("viewerPos", _camera.getPosition());
+        model_shader.setInt("cubemapTex", 0);
         glActiveTexture(GL_TEXTURE0);
-        cubeTexture.bind();
-        objects_shader.setInt("cubemapTex", 1);
-        glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTex.getID());
-        objects_shader.setMat4("view", view);
-        objects_shader.setMat4("projection", projection);
-        objects_shader.setMat4("model", model);
-        objects_shader.setVec3f("viewerPos", _camera.getPosition());
-        glDrawArrays(GL_TRIANGLES, 0, 36);  
+        ourModel.draw(model_shader);
 
         glBindVertexArray(cubemapVAO); // let cube map behind, it's more effective, because depth test, it will block object
         glDepthFunc(GL_LEQUAL);
@@ -322,10 +259,7 @@ int main(int argc, char *argv[])
         glfwPollEvents();
     }
     
-    glDeleteVertexArrays(1, &objects_vao);
-    glDeleteBuffers(1, &cube_vbo);
     
-    objects_shader.destory();
     glfwDestroyWindow(window);
     glfwTerminate();
     std::cout << "fps:" << (int)(1 / deltaTime) << std::endl;
