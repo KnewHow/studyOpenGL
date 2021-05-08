@@ -219,7 +219,7 @@ int main(int argc, char *argv[])
          1.0f,  1.0f,  1.0f, 1.0f
     };
 
-    Texture cubeTexture("../res/texture/marble.jpg");
+    Texture cubeTexture("../res/texture/container.jpg");
     Texture planeTexture("../res/texture/metal.png");
 
     int stride = 5 * sizeof(float);
