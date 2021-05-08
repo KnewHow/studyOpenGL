@@ -148,8 +148,10 @@ int main(int argc, char *argv[])
 
     Shader objects_shader("../shader/object/vertex.glsl", "../shader/object/fragment.glsl");
     Shader cubemap_shader("../shader/cubemap/vertex.glsl", "../shader/cubemap/fragment.glsl");
-    Texture cubeTexture("../res/texture/container.jpg");
     
+    Texture cubeTexture("../res/texture/container.jpg");
+    Cubemap cubemapTex("../res/texture/cubemap/skybox");
+
     GLfloat cubeVertices[] = {
        // positions          // normals        // texture coords
         -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
@@ -297,7 +299,14 @@ int main(int argc, char *argv[])
         projection = glm::perspective(glm::radians(_camera.getZoom()), (float)width/height, 0.1f, 100.0f);
         
         glBindVertexArray(cubemapVAO);
-        
+        glDepthMask(GL_FALSE);
+        cubemap_shader.use();
+        glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTex.getID());
+        glm::mat4 cubemapView = glm::mat4(glm::mat3(view));
+        cubemap_shader.setMat4("view", cubemapView);
+        cubemap_shader.setMat4("projection", projection);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        glDepthMask(GL_TRUE);
         
         glBindVertexArray(objects_vao);
         objects_shader.use();
