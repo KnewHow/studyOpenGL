@@ -13,6 +13,7 @@
 #include "shader.hpp"
 #include "texture.hpp"
 #include "camera.hpp"
+#include "cubemap.hpp"
 //#include "debugGL.hpp"
 
 const int width = 1366;
@@ -128,6 +129,8 @@ namespace
     }
 }
 
+
+
 int main(int argc, char *argv[])
 {
     glfwSetErrorCallback(errorCallback);
@@ -144,11 +147,10 @@ int main(int argc, char *argv[])
     glfwSetScrollCallback(window, mouse_scroll_callback);
 
     Shader objects_shader("../shader/object/vertex.glsl", "../shader/object/fragment.glsl");
-
-    Texture diffuse_texture("../res/texture/container2.png", GL_RGBA, false);
-    Texture specular_texture("../res/texture/container2_specular.png", GL_RGBA, false);
+    Shader cubemap_shader("../shader/cubemap/vertex.glsl", "../shader/cubemap/fragment.glsl");
+    Texture cubeTexture("../res/texture/container.jpg");
     
-    GLfloat vertices[] = {
+    GLfloat cubeVertices[] = {
        // positions          // normals        // texture coords
         -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
@@ -193,27 +195,56 @@ int main(int argc, char *argv[])
         -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
     };
 
-    std::vector<glm::vec3> cubePositions = {
-        glm::vec3( 0.0f,  0.0f,  0.0f),
-        glm::vec3( 2.0f,  5.0f, -15.0f),
-        glm::vec3(-1.5f, -2.2f, -2.5f),
-        glm::vec3(-3.8f, -2.0f, -12.3f),
-        glm::vec3( 2.4f, -0.4f, -3.5f),
-        glm::vec3(-1.7f,  3.0f, -7.5f),
-        glm::vec3( 1.3f, -2.0f, -2.5f),
-        glm::vec3( 1.5f,  2.0f, -2.5f),
-        glm::vec3( 1.5f,  0.2f, -1.5f),
-        glm::vec3(-1.3f,  1.0f, -1.5f)
+    GLfloat cubemapVertices[] = {
+        // positions          
+        -1.0f,  1.0f, -1.0f,
+        -1.0f, -1.0f, -1.0f,
+        1.0f, -1.0f, -1.0f,
+        1.0f, -1.0f, -1.0f,
+        1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+
+        -1.0f, -1.0f,  1.0f,
+        -1.0f, -1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f, -1.0f,
+        -1.0f,  1.0f,  1.0f,
+        -1.0f, -1.0f,  1.0f,
+
+        1.0f, -1.0f, -1.0f,
+        1.0f, -1.0f,  1.0f,
+        1.0f,  1.0f,  1.0f,
+        1.0f,  1.0f,  1.0f,
+        1.0f,  1.0f, -1.0f,
+        1.0f, -1.0f, -1.0f,
+
+        -1.0f, -1.0f,  1.0f,
+        -1.0f,  1.0f,  1.0f,
+        1.0f,  1.0f,  1.0f,
+        1.0f,  1.0f,  1.0f,
+        1.0f, -1.0f,  1.0f,
+        -1.0f, -1.0f,  1.0f,
+
+        -1.0f,  1.0f, -1.0f,
+        1.0f,  1.0f, -1.0f,
+        1.0f,  1.0f,  1.0f,
+        1.0f,  1.0f,  1.0f,
+        -1.0f,  1.0f,  1.0f,
+        -1.0f,  1.0f, -1.0f,
+
+        -1.0f, -1.0f, -1.0f,
+        -1.0f, -1.0f,  1.0f,
+        1.0f, -1.0f, -1.0f,
+        1.0f, -1.0f, -1.0f,
+        -1.0f, -1.0f,  1.0f,
+        1.0f, -1.0f,  1.0f
     };
 
 
-
-    glm::vec3 lightDir = glm::vec3(-0.2f, -1.0f, -0.3f);
-
-    GLuint VBO;
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    GLuint cube_vbo;
+    glGenBuffers(1, &cube_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, cube_vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), cubeVertices, GL_STATIC_DRAW);
     
     GLsizei stride = 8 * sizeof(float);
 
@@ -228,21 +259,23 @@ int main(int argc, char *argv[])
 
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, stride, (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
+    glBindVertexArray(0);
 
-    GLuint light_vao;
-    glGenVertexArrays(1, &light_vao);
-    glBindVertexArray(light_vao);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
+    GLuint cubemapVAO, cubemapVBO;
+    glGenVertexArrays(1, &cubemapVAO);
+    glBindVertexArray(cubemapVAO);
+
+    glGenBuffers(1, &cubemapVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, cubemapVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cubemapVertices), &cubemapVertices[0], GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+    glBindVertexArray(0);
 
     glEnable(GL_DEPTH_TEST);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0); // cancel bind
-    glBindVertexArray(0);
-    
     
 
-    // don't run too long time, the memory will be customed 
     while (!glfwWindowShouldClose(window))
     {
         processInput(window);
@@ -263,50 +296,27 @@ int main(int argc, char *argv[])
         glm::mat4 projection;
         projection = glm::perspective(glm::radians(_camera.getZoom()), (float)width/height, 0.1f, 100.0f);
         
+        glBindVertexArray(cubemapVAO);
+        
+        
         glBindVertexArray(objects_vao);
         objects_shader.use();
-       
-        glm::vec3 lightColor = glm::vec3(1, 1, 1);
-        objects_shader.setInt("material.diffuse", 0);
+        objects_shader.setInt("texture1", 0);
         glActiveTexture(GL_TEXTURE0);
-        diffuse_texture.bind(); // bind diffuse specular
-
-        objects_shader.setInt("material.specular", 1);
-        glActiveTexture(GL_TEXTURE1);
-        specular_texture.bind(); // bind specular texture
-
-        objects_shader.setVec3f("light.direction", lightDir);
-        objects_shader.setVec3f("light.ambient", lightColor * 0.2f);
-        objects_shader.setVec3f("light.diffuse", lightColor * 0.5f);
-        objects_shader.setVec3f("light.specular", 1.0f, 1.0f, 1.0f);
-
-        objects_shader.setVec3f("material.specular", 0.5f, 0.5f, 0.5f);
-        objects_shader.setFloat("material.shininess", 32.0f);
-        
-       
+        cubeTexture.bind();
         objects_shader.setMat4("view", view);
         objects_shader.setMat4("projection", projection);
-        objects_shader.setVec3f("viewerPosition", _camera.getPosition());
-        for(int i = 0; i < cubePositions.size(); i++) {
-            model = glm::mat4(1.0f);
-            model = glm::translate(model, cubePositions[i]);
-            float angle = 20 * i;
-            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-            objects_shader.setMat4("model", model);
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-        }       
+        objects_shader.setMat4("model", model);
+        glDrawArrays(GL_TRIANGLES, 0, 36);  
        
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
     
     glDeleteVertexArrays(1, &objects_vao);
-    glDeleteVertexArrays(1, &light_vao);
-    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &cube_vbo);
     
     objects_shader.destory();
-    diffuse_texture.unbind();
-    specular_texture.unbind();
     glfwDestroyWindow(window);
     glfwTerminate();
     std::cout << "fps:" << (int)(1 / deltaTime) << std::endl;
