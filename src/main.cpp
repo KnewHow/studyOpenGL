@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
 
     
     glEnable(GL_DEPTH_TEST);
-
+    auto begin = glfwGetTime();
     while (!glfwWindowShouldClose(window))
     {
         processInput(window);
@@ -176,7 +176,7 @@ int main(int argc, char *argv[])
         shader.setMat4("model", model);
         shader.setMat4("view", view);
         shader.setMat4("projection", projection);
-        shader.setFloat("time", glfwGetTime());
+        shader.setFloat("time", glfwGetTime() - begin);
         ourModel.draw(shader);
 
         glfwSwapBuffers(window);

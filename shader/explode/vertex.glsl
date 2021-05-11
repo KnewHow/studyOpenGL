@@ -10,9 +10,11 @@ uniform mat4 projection;
 
 out VS_OUT {
     vec2 texCoords;
+    vec3 worldPosition;
 } vs_out;
 
 void main() {
     gl_Position = projection * view * model * vec4(aPosition, 1.0);
+    vs_out.worldPosition = vec3(model * vec4(aPosition, 1.0));
     vs_out.texCoords = aTexCoords;
 }
