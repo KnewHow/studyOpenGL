@@ -145,30 +145,10 @@ int main(int argc, char *argv[])
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, mouse_scroll_callback);
     
-    Shader shader("../shader/geometryDemo/vertex.glsl", "../shader/geometryDemo/fragment.glsl", "../shader/geometryDemo/geometry.glsl");
+    Model::Model ourModel("../res/model/backpack/backpack.obj");
 
-    float points[] = {
-        -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, // top-left
-         0.5f,  0.5f, 0.0f, 1.0f, 0.0f, // top-right
-         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, // bottom-right
-        -0.5f, -0.5f, 1.0f, 1.0f, 0.0f  // bottom-left
-    };
+    Shader shader("../shader/explode/vertex.glsl", "../shader/explode/fragment.glsl", "../shader/explode/geometry.glsl");
 
-    GLuint VAO, VBO;
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
-    
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(points), &points, GL_STATIC_DRAW);
-
-    int stride = 5 * sizeof(float);
-
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, stride, (void*)0);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(2 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-    glBindVertexArray(0);
     
     glEnable(GL_DEPTH_TEST);
 
@@ -191,11 +171,13 @@ int main(int argc, char *argv[])
         
         glm::mat4 projection;
         projection = glm::perspective(glm::radians(_camera.getZoom()), (float)width/height, 0.1f, 100.0f);
-    
+        
         shader.use();
-        glBindVertexArray(VAO);
-        glDrawArrays(GL_POINTS, 0, 4);
-
+        shader.setMat4("model", model);
+        shader.setMat4("view", view);
+        shader.setMat4("projection", projection);
+        shader.setFloat("time", glfwGetTime());
+        ourModel.draw(shader);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
