@@ -11,7 +11,12 @@
 
 
 Shader::Shader(const std::string& v_path, const std::string& f_path)
-    :vertex_shader_path(v_path), fragment_shader_path(f_path)
+    :vertex_shader_path(v_path), fragment_shader_path(f_path), geometry_shader_path(std::nullopt)
+{
+    program = createProgram();
+}
+Shader::Shader(const std::string& v_path, const std::string& f_path, const std::string& g_path) 
+     :vertex_shader_path(v_path), fragment_shader_path(f_path), geometry_shader_path(g_path)
 {
     program = createProgram();
 }
@@ -33,7 +38,21 @@ std::string Shader::loadFile(const std::string& filepath) {
 }
 
 GLuint Shader::compileShader(const std::string& shaderContent, const ShaderType& type) {
-    GLuint shader = glCreateShader(type == ShaderType::Vertex ? GL_VERTEX_SHADER : GL_FRAGMENT_SHADER);
+    
+    GLuint shader;
+    switch (type)
+    {
+    case ShaderType::Vertex:
+        shader = glCreateShader(GL_VERTEX_SHADER);
+        break;
+    
+    case ShaderType::Fragment:
+        shader = glCreateShader(GL_FRAGMENT_SHADER);
+        break;
+    case ShaderType::Geometry:
+        shader = glCreateShader(GL_GEOMETRY_SHADER);
+        break;
+    }
     const char* c_str = shaderContent.c_str();
     glShaderSource(shader, 1, &c_str, NULL);
     glCompileShader(shader);
@@ -60,11 +79,21 @@ GLuint Shader::createProgram() {
     std::string fragment_shader_content = loadFile(fragment_shader_path);
     GLuint vertex_shader = compileShader(vertex_shader_content, ShaderType::Vertex);
     GLuint fragment_shader = compileShader(fragment_shader_content, ShaderType::Fragment);
+    
+    std::optional<GLuint> geometry_shader = std::nullopt;
+    if(geometry_shader_path.has_value()) {
+        std::string geometry_shader_content = loadFile(geometry_shader_path.value());
+        geometry_shader = compileShader(geometry_shader_content, ShaderType::Geometry);
+    }
+
     GLuint program = 0;
     if(vertex_shader != GL_FALSE && fragment_shader != GL_FALSE) {
         program = glCreateProgram();
         glAttachShader(program, vertex_shader);
         glAttachShader(program, fragment_shader);
+        if(geometry_shader.has_value() && geometry_shader.value() != GL_FALSE) {
+            glAttachShader(program, geometry_shader.value());
+        }
         glLinkProgram(program);
         GLint success = false;
         glGetProgramiv(program, GL_LINK_STATUS, &success);
@@ -79,6 +108,9 @@ GLuint Shader::createProgram() {
     }
     glDeleteShader(vertex_shader);
     glDeleteShader(fragment_shader);
+    if(geometry_shader.has_value() && geometry_shader.value() != GL_FALSE) {
+        glDeleteShader(geometry_shader.value());
+    }
     return program;
 }
 
