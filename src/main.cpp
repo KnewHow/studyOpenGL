@@ -144,68 +144,32 @@ int main(int argc, char *argv[])
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, mouse_scroll_callback);
-    Shader model_shader("../shader/model/vertex.glsl", "../shader/model/fragment.glsl");
-    Shader light_shader("../shader/light/vertex.glsl", "../shader/light/fragment.glsl");
-    Model::Model ourModel("../res/model/backpack/backpack.obj");
+    
+    Shader shader("../shader/geometryDemo/vertex.glsl", "../shader/geometryDemo/fragment.glsl", "../shader/geometryDemo/geometry.glsl");
 
-     GLfloat vertices[] = {
-        // positions          // normals        // texture coords
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-        0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
-        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
-
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-        0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
-        0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-        0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
-
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-
-        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-        0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
-        0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-        0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
-        0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
-        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
-
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-        0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
-        0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-        0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
-
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
-        0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
-        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
+    float points[] = {
+        -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, // top-left
+         0.5f,  0.5f, 0.0f, 1.0f, 0.0f, // top-right
+         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, // bottom-right
+        -0.5f, -0.5f, 1.0f, 1.0f, 0.0f  // bottom-left
     };
-    GLsizei stride = 8 * sizeof(float);
 
-    GLuint VBO;
+    GLuint VAO, VBO;
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+    
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(points), &points, GL_STATIC_DRAW);
 
-    GLuint light_vao;
-    glGenVertexArrays(1, &light_vao);
-    glBindVertexArray(light_vao);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
+    int stride = 5 * sizeof(float);
+
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, stride, (void*)0);
     glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(2 * sizeof(float)));
+    glEnableVertexAttribArray(1);
     glBindVertexArray(0);
-
+    
     glEnable(GL_DEPTH_TEST);
 
     while (!glfwWindowShouldClose(window))
@@ -227,49 +191,11 @@ int main(int argc, char *argv[])
         
         glm::mat4 projection;
         projection = glm::perspective(glm::radians(_camera.getZoom()), (float)width/height, 0.1f, 100.0f);
-        
-        
-        glBindVertexArray(light_vao);
-        light_shader.use();
-        light_shader.setMat4("view", view);
-        light_shader.setMat4("projection", projection);
-        glm::vec3 lightPosition = glm::vec3(0);
-        lightPosition.x = (std::sin(glfwGetTime() / 1.5)) * 2.0;
-        lightPosition.y = (std::sin(glfwGetTime() / 2.0)) * 2.5;
-        lightPosition.z = (std::cos(glfwGetTime() / 2.0)) * 3.0;
-        model = glm::translate(model, lightPosition);
-        model = glm::scale(model, glm::vec3(0.2));
-        light_shader.setMat4("model", model);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        
-
-        model = glm::mat4(1.0);
-        model_shader.use();
-        model_shader.setMat4("model", model);
-        model_shader.setMat4("view", view);
-        model_shader.setMat4("projection", projection);
-
-        glm::vec3 lightColor = glm::vec3(1.0);
-        model_shader.setVec3f("directionLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
-        model_shader.setVec3f("directionLight.ambient", lightColor * 0.1f);
-        model_shader.setVec3f("directionLight.diffuse", lightColor * 0.7f);
-        model_shader.setVec3f("directionLight.specular", lightColor * 1.0f);
     
+        shader.use();
+        glBindVertexArray(VAO);
+        glDrawArrays(GL_POINTS, 0, 4);
 
-        model_shader.setVec3f("pointLight.position", lightPosition);
-        model_shader.setVec3f("pointLight.ambient", lightColor * 0.1f);
-        model_shader.setVec3f("pointLight.diffuse", lightColor * 0.7f);
-        model_shader.setVec3f("pointLight.specular", lightColor * 1.0f);
-        model_shader.setFloat("pointLight.constant", 1.0f);
-        model_shader.setFloat("pointLight.linear", 0.09f);
-        model_shader.setFloat("pointLight.quadratic", 0.032f);
-        
-        
-        model_shader.setVec3f("viewerPosition", _camera.getPosition());
-        
-        
-        ourModel.draw(model_shader);
-    
 
         glfwSwapBuffers(window);
         glfwPollEvents();
