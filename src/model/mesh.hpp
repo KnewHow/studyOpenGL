@@ -42,8 +42,8 @@ namespace Model {
             setupMesh();
         }
 
-        void draw(const Shader& shader) const {
-            unsigned int diffuseNr = 1;
+        void bindTexture(const Shader& shader) const {
+             unsigned int diffuseNr = 1;
             unsigned int specularNr = 1;
             unsigned int normalNr = 1;
             unsigned int heightNr = 1;
@@ -64,10 +64,18 @@ namespace Model {
                 glBindTexture(GL_TEXTURE_2D, textures[i].id);
             }
             glActiveTexture(GL_TEXTURE0);
+        }
 
+        void draw(const Shader& shader) const {
+           
+            bindTexture(shader);
             glBindVertexArray(VAO);
             glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
             glBindVertexArray(0);
+        }
+
+        inline GLuint getVAO() const {
+            return VAO;
         }
     
         std::vector<Vertex> vertices;

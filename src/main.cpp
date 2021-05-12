@@ -22,7 +22,7 @@ const int height = 768;
 
 float mixValue = 0.2;
 
-Camera _camera(glm::vec3(0.0f, 0.0f, 3.0f));
+Camera _camera(glm::vec3(0.0f, 20.0f, 155.0f));
 
 
 bool firstMouse = true;
@@ -145,54 +145,56 @@ int main(int argc, char *argv[])
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, mouse_scroll_callback);
     
-    Shader shader("../shader/instanceCube/vertex.glsl", "../shader/instanceCube/fragment.glsl");
+    Shader planet_shader("../shader/model/vertex.glsl", "../shader/model/fragment.glsl");
+    Model::Model planetModel("../res/model/planet/planet.obj");
+    Shader rock_shader("../shader/rock/vertex.glsl", "../shader/rock/fragment.glsl");
+    Model::Model rockModel("../res/model/rock/rock.obj");
 
-    float quadVertices[] = {
-         // positions     // colors
-        -0.05f,  0.05f,  1.0f, 0.0f, 0.0f,
-        0.05f, -0.05f,  0.0f, 1.0f, 0.0f,
-        -0.05f, -0.05f,  0.0f, 0.0f, 1.0f,
+    int amount = 30000;
+    std::vector<glm::mat4> rockModelMatrices;
+    rockModelMatrices.reserve(amount);
+    std::srand(glfwGetTime());
+    float radius = 150.0f;
+    float offset = 25.0f;
+    for(int i = 0; i < amount; i++) {
+        glm::mat4 m = glm::mat4(1.0);
+        float angle = (float) i / amount * 360.0f;
+        float displacement = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
+        float x = std::sin(angle) * radius + displacement;
+        displacement = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
+        float y = displacement * 0.4;
+        displacement = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
+        float z = std::cos(angle) * radius + displacement;
+        m = glm::translate(m, glm::vec3(x, y, z));
 
-        -0.05f,  0.05f,  1.0f, 0.0f, 0.0f,
-        0.05f, -0.05f,  0.0f, 1.0f, 0.0f,   
-        0.05f,  0.05f,  0.0f, 1.0f, 1.0f	
-    };
+        float scale = (rand() % 20) / 100.0f + 0.05f;
+        m = glm::scale(m, glm::vec3(scale));
 
-    GLuint quadVAO, quadVBO;
-    glGenVertexArrays(1, &quadVAO);
-    glBindVertexArray(quadVAO);
-
-    glGenBuffers(1, &quadVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float),(void*)(2 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-
-    std::vector<glm::vec2> translations;
-    translations.reserve(100);
-    float offset = 0.1;
-    for(int y = -10; y < 10; y += 2) {
-        for(int x = -10; x < 10; x += 2) {
-            glm::vec2 translation;
-            translation.x = (float)x / 10.0 + offset;
-            translation.y = (float)y / 10.0 + offset;
-            translations.push_back(translation);
-        }
+        float rotateAngle = (rand() % 360);
+        m = glm::rotate(m, rotateAngle, glm::vec3(0.4, 0.6, 0.8));
+        rockModelMatrices.push_back(m);
     }
-    GLuint translationVBO;
-    glGenBuffers(1, &translationVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, translationVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * translations.size(), &translations[0], GL_STATIC_DRAW);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), (void*)0);
-    glEnableVertexAttribArray(2);
-    //glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glVertexAttribDivisor(2, 1);
-    glBindVertexArray(0);
 
-    //glEnable(GL_DEPTH_TEST);
+    std::vector<Model::Mesh> rockMeshs = rockModel.getMesh();
+    GLuint rockBuffer;
+    glGenBuffers(1, &rockBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, rockBuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::mat4) * amount, &rockModelMatrices[0], GL_STATIC_DRAW);
+
+    for(auto const& mesh: rockMeshs) {
+        GLuint VAO = mesh.getVAO();
+        glBindVertexArray(VAO);
+        std::size_t vec4Size = sizeof(glm::vec4);
+        int beginPos = 3;
+        for(int j = 0; j < 4; j++) {
+            glVertexAttribPointer(beginPos + j, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(j * sizeof(glm::vec4)));
+            glEnableVertexAttribArray(beginPos + j);
+            glVertexAttribDivisor(beginPos + j, 1);
+        }
+        glBindVertexArray(0);
+    }
+    
+    glEnable(GL_DEPTH_TEST);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -210,20 +212,35 @@ int main(int argc, char *argv[])
 
         glm::mat4 view;
         view = _camera.getViewMat();
-        
+
         glm::mat4 projection;
-        projection = glm::perspective(glm::radians(_camera.getZoom()), (float)width/height, 0.1f, 100.0f);
+        projection = glm::perspective(glm::radians(_camera.getZoom()), (float)width/height, 0.1f, 1000.0f);
 
-        glBindVertexArray(quadVAO);
-        shader.use();
-        glDrawArraysInstanced(GL_TRIANGLES, 0, 6, 100);
 
+        planet_shader.use();
+        model = glm::translate(model, glm::vec3(0.0, -3.0, 0.0));
+        model = glm::scale(model, glm::vec3(4.0));
+        planet_shader.setMat4("model", model);
+        planet_shader.setMat4("view", view);
+        planet_shader.setMat4("projection", projection);
+        planetModel.draw(planet_shader);
+        
+        rock_shader.use();
+        rock_shader.setMat4("view", view);
+        rock_shader.setMat4("projection", projection);
+        
+        for(const auto& mesh: rockMeshs) {
+            mesh.bindTexture(rock_shader);
+            glBindVertexArray(mesh.getVAO());
+            glDrawElementsInstanced(GL_TRIANGLES, mesh.indices.size(), GL_UNSIGNED_INT, 0, amount);
+            glBindVertexArray(0);
+        }
         glfwSwapBuffers(window);
         glfwPollEvents();
+        std::cout << "fps:" << (int)(1 / deltaTime) << std::endl;
     }
 
     glfwDestroyWindow(window);
     glfwTerminate();
-    std::cout << "fps:" << (int)(1 / deltaTime) << std::endl;
     return 0;
 }

@@ -33,6 +33,19 @@ namespace Model
             for(const auto& mesh: meshs)
                 mesh.draw(shader);
         }
+
+        std::vector<Mesh> getMesh() const {
+            return meshs;
+        }
+
+        std::optional<Texture> getCachedTextureByName(const std::string& name) const {
+            auto res = textureCache.find(name);
+            if(res != textureCache.end()) {
+                return res->second;
+            }
+            return std::nullopt;
+        }
+
     private:
         void loadModel(const std::string& path) {
             Assimp::Importer importer;
