@@ -106,6 +106,7 @@ namespace
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+        glfwWindowHint(GLFW_SAMPLES, 4);
 
         GLFWwindow *window = glfwCreateWindow(width, height, "StudyOpenGL", nullptr, nullptr);
         if (!window)
@@ -144,9 +145,7 @@ int main(int argc, char *argv[])
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, mouse_scroll_callback);
-    Shader model_shader("../shader/model/vertex.glsl", "../shader/model/fragment.glsl");
-    Shader light_shader("../shader/light/vertex.glsl", "../shader/light/fragment.glsl");
-    Model::Model ourModel("../res/model/backpack/backpack.obj");
+    Shader cube_shader("../shader/light/vertex.glsl", "../shader/light/fragment.glsl");
 
      GLfloat vertices[] = {
         // positions          // normals        // texture coords
@@ -206,6 +205,7 @@ int main(int argc, char *argv[])
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);
 
+    glEnable(GL_MULTISAMPLE);
     glEnable(GL_DEPTH_TEST);
 
     while (!glfwWindowShouldClose(window))
@@ -230,47 +230,12 @@ int main(int argc, char *argv[])
         
         
         glBindVertexArray(light_vao);
-        light_shader.use();
-        light_shader.setMat4("view", view);
-        light_shader.setMat4("projection", projection);
-        glm::vec3 lightPosition = glm::vec3(0);
-        lightPosition.x = (std::sin(glfwGetTime() / 1.5)) * 2.0;
-        lightPosition.y = (std::sin(glfwGetTime() / 2.0)) * 2.5;
-        lightPosition.z = (std::cos(glfwGetTime() / 2.0)) * 3.0;
-        model = glm::translate(model, lightPosition);
-        model = glm::scale(model, glm::vec3(0.2));
-        light_shader.setMat4("model", model);
+        cube_shader.use();
+        cube_shader.setMat4("view", view);
+        cube_shader.setMat4("projection", projection);
+        cube_shader.setMat4("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 36);
         
-
-        model = glm::mat4(1.0);
-        model_shader.use();
-        model_shader.setMat4("model", model);
-        model_shader.setMat4("view", view);
-        model_shader.setMat4("projection", projection);
-
-        glm::vec3 lightColor = glm::vec3(1.0);
-        model_shader.setVec3f("directionLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
-        model_shader.setVec3f("directionLight.ambient", lightColor * 0.1f);
-        model_shader.setVec3f("directionLight.diffuse", lightColor * 0.7f);
-        model_shader.setVec3f("directionLight.specular", lightColor * 1.0f);
-    
-
-        model_shader.setVec3f("pointLight.position", lightPosition);
-        model_shader.setVec3f("pointLight.ambient", lightColor * 0.1f);
-        model_shader.setVec3f("pointLight.diffuse", lightColor * 0.7f);
-        model_shader.setVec3f("pointLight.specular", lightColor * 1.0f);
-        model_shader.setFloat("pointLight.constant", 1.0f);
-        model_shader.setFloat("pointLight.linear", 0.09f);
-        model_shader.setFloat("pointLight.quadratic", 0.032f);
-        
-        
-        model_shader.setVec3f("viewerPosition", _camera.getPosition());
-        
-        
-        ourModel.draw(model_shader);
-    
-
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
