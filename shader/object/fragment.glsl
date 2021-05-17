@@ -41,10 +41,10 @@ void main() {
     float spec = pow(max(dot(normal, halfVec), 0.0), 32);
     vec3 specColor = lightColor * spec;
 
-    // float shadow = calculateShadow();
-    // vec3 lightingColor = (ambientColor + (1.0 - shadow) * (specColor + diffColor)) * color;
+    float shadow = calculateShadow();
+    vec3 lightingColor = (ambientColor + (1.0 - shadow) * (specColor + diffColor)) * color;
 
-    vec3 lightingColor = (diffColor + specColor) * color;
+    //vec3 lightingColor = (diffColor + specColor) * color;
 
     frag_Color = vec4(lightingColor, 1.0);
 }
