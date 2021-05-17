@@ -247,7 +247,7 @@ void renderFloor() {
         glBindVertexArray(0);
     }
     glBindVertexArray(planeVAO);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
 }
 
@@ -332,6 +332,8 @@ int main(int argc, char *argv[])
     
     Shader depthMappingShader("../shader/depthMapping/vertex.glsl", "../shader/depthMapping/fragment.glsl");
     Shader quadShader("../shader/quad/vertex.glsl", "../shader/quad/fragment.glsl");
+    Shader objShader("../shader/object/vertex.glsl", "../shader/object/fragment.glsl");
+    Texture woodTexture("../res/texture/wood.png");
 
     glm::vec3 lightPos(-2.0f, 4.0f, -1.0f);
 
@@ -387,13 +389,21 @@ int main(int argc, char *argv[])
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, width, height);
-        quadShader.use();
-        quadShader.setFloat("z_near", z_near);
-        quadShader.setFloat("z_far", z_far);
-        quadShader.setInt("texture_mask", 0);
+        objShader.use();
+        objShader.setMat4("view", view);
+        objShader.setMat4("projection", projection);
+        objShader.setMat4("lightSpaceMatrix", lightMatrix);   
+        objShader.setVec3f("lightPos", lightPos);
+        objShader.setVec3f("viewerPos", _camera.getPosition());
+
+        objShader.setInt("diffuse_texture", 0);
         glActiveTexture(GL_TEXTURE0);
+        woodTexture.bind();
+
+        objShader.setInt("shadow_texture", 1);
+        glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, depthTexture);
-        renderQuad(quadShader);
+        renderScene(objShader);
 
         glfwSwapBuffers(window);
         glfwPollEvents();

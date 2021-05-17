@@ -10,21 +10,20 @@ Texture::Texture(const std::string& p)
     loadTexture();
 }
 
-Texture::Texture(const std::string& p, GLenum format)
-    :width(0), height(0), nrChannels(0), ID(0), data(nullptr), path(p), format(format), isFlipVertically(false), wrappingMode(GL_REPEAT), filterMode(GL_LINE)
+Texture::Texture(const std::string& p, bool isFlipVertically)
+    :width(0), height(0), nrChannels(0), ID(0), data(nullptr), path(p), format(GL_RGB), isFlipVertically(isFlipVertically), wrappingMode(GL_REPEAT), filterMode(GL_LINE)
 {
     loadTexture();
 }
 
-
-Texture::Texture(const std::string& p,  GLenum format, bool isFlipVertically)
-    :width(0), height(0), nrChannels(0), ID(0), data(nullptr), path(p), format(format), isFlipVertically(isFlipVertically), wrappingMode(GL_REPEAT), filterMode(GL_LINE)
+Texture::Texture(const std::string& p, GLint wrappingMode) 
+    :width(0), height(0), nrChannels(0), ID(0), data(nullptr), path(p), format(GL_RGB), isFlipVertically(false), wrappingMode(wrappingMode), filterMode(GL_LINE)
 {
     loadTexture();
 }
 
-Texture::Texture(const std::string& p,  GLenum format, bool isFlipVertically, GLint wrappingMode) 
-    :width(0), height(0), nrChannels(0), ID(0), data(nullptr), path(p), format(format), isFlipVertically(isFlipVertically), wrappingMode(wrappingMode), filterMode(GL_LINE)
+Texture::Texture(const std::string& p, bool isFlipVertically, GLint wrappingMode) 
+    :width(0), height(0), nrChannels(0), ID(0), data(nullptr), path(p), format(GL_RGB), isFlipVertically(isFlipVertically), wrappingMode(wrappingMode), filterMode(GL_LINE)
 {
     loadTexture();
 }
@@ -63,6 +62,16 @@ void Texture::loadTexture() {
     stbi_set_flip_vertically_on_load(isFlipVertically); 
     data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
     if(data != nullptr) {
+        if(nrChannels == 1) {
+            format = GL_RED;
+        } else if(nrChannels == 3) {
+            format = GL_RGB;
+        } else if(nrChannels == 4) {
+            format = GL_RGBA;
+        } else {
+            std::cout << "load texture failure, unsupport file format! file path is: " << path << std::endl;
+            return;
+        }
         glGenTextures(1, &ID);
     } else {
         std::cout << "load texture failure, path: " << path << std::endl;

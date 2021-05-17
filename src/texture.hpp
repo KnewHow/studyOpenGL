@@ -17,9 +17,9 @@ private:
     void loadTexture();
 public:
     Texture(const std::string& p);
-    Texture(const std::string& p,  GLenum format);
-    Texture(const std::string& p,  GLenum format, bool isFlipVertically);
-    Texture(const std::string& p,  GLenum format, bool isFlipVertically, GLint wrappingMode);
+    Texture(const std::string& p, bool isFlipVertically);
+    Texture(const std::string& p, GLint wrappingMode);
+    Texture(const std::string& p, bool isFlipVertically, GLint wrappingMode);
     ~Texture();
     inline int getWidth() { return width; }
     inline int getHeight() { return height; }
