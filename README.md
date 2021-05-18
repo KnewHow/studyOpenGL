@@ -1,2 +1,2 @@
 # studyOpenGL
-Drawing a triangle with opengl!
+Studying penGL from [LearningOpenGl](https://learnopengl.com/)
