@@ -19,8 +19,8 @@
 
 const int width = 1366;
 const int height = 768;
-const int depth_mapping_width = 1024;
-const int depth_mapping_height = 1024;
+const int depth_mapping_width = 2048;
+const int depth_mapping_height = 2048;
 
 float mixValue = 0.2;
 
@@ -344,8 +344,10 @@ int main(int argc, char *argv[])
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, depth_mapping_width, depth_mapping_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER); 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    float borderColor[] = {1.0, 1.0, 1.0, 1.0};
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 
     // bind framebuffer depth to texture
     glBindFramebuffer(GL_FRAMEBUFFER, depthFrameBuffer);
@@ -355,6 +357,7 @@ int main(int argc, char *argv[])
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     glEnable(GL_DEPTH_TEST);
+    //glEnable(GL_CULL_FACE);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -384,7 +387,9 @@ int main(int argc, char *argv[])
         glViewport(0, 0, depth_mapping_width, depth_mapping_height);
         depthMappingShader.use();
         depthMappingShader.setMat4("lightMatrix", lightMatrix);
+        glCullFace(GL_FRONT);
         renderScene(depthMappingShader);
+        glCullFace(GL_BACK);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
