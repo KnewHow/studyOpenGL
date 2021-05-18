@@ -4,39 +4,36 @@ out vec4 frag_Color;
 
 uniform vec3 lightPos;
 uniform vec3 viewerPos;
+uniform float z_far;
 
 uniform sampler2D diffuse_texture;
-uniform sampler2D shadow_texture;
+uniform samplerCube shadow_cube;
 
 in VS_OUT {
     vec3 fragPos;
     vec3 normal;
     vec2 texCoords;
-    vec4 fragLightSpacePos;
 } fs_in;
 
 
-float calculateShadow(vec3 normal, vec3 lightDir) {
-    vec3 projectCoords = fs_in.fragLightSpacePos.xyz / fs_in.fragLightSpacePos.w;
-    projectCoords = projectCoords * 0.5 + 0.5;
-    float closestDepth = texture(shadow_texture, projectCoords.xy).r;
-    float currentDepth = projectCoords.z;
+float calculateShadow(vec3 fragPos, vec3 normal, vec3 lightDir) {
+    vec3 fragToLight = fragPos - lightPos;
+    float currentDepth = length(fragToLight);
     float bias = max(0.05 * (1 - dot(normal, lightDir)), 0.005);
     //pcf
     float shadow = 0.0;
-    vec2 texelSize = 1.0 / textureSize(shadow_texture, 0);
-    for(int x = -1; x <= 1; x++) {
-        for(int y = -1; y <=1; y++) {
-            float pcfDepth = texture(shadow_texture, projectCoords.xy + vec2(x, y) * texelSize).r;
-            shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
-        }
+    float offset = 0.1;
+    float samples = 4.0;
+    for(float x = -offset; x < offset; x += 2 * offset / samples) {
+        for(float y = -offset; y < offset; y += 2 * offset / samples) {
+            for(float z = -offset; z < offset; z += 2 * offset / samples) {
+                vec3 samplerPos = fragToLight + vec3(x, y, z);
+                float samplerDepth = texture(shadow_cube, samplerPos).r * z_far;
+                shadow += currentDepth - bias > samplerDepth ? 1.0 : 0.0;
+            }
+        }   
     }
-    
-    if(currentDepth > 1.0) {
-        shadow = 0.0;
-    }
-    
-    return shadow / 9.0;
+    return shadow / (samples * samples * samples);
 }
 
 void main() {
@@ -55,10 +52,7 @@ void main() {
     float spec = pow(max(dot(normal, halfVec), 0.0), 64);
     vec3 specColor = lightColor * spec;
 
-    float shadow = calculateShadow(normal, lightDir);
+    float shadow = calculateShadow(fs_in.fragPos, normal, lightDir);
     vec3 lightingColor = (ambientColor + (1.0 - shadow) * (specColor + diffColor)) * color;
-
-    //vec3 lightingColor = (diffColor + specColor) * color;
-
     frag_Color = vec4(lightingColor, 1.0);
 }

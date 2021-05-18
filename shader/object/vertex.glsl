@@ -7,19 +7,21 @@ layout(location = 2) in vec2 aTexCoords;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
-uniform mat4 lightSpaceMatrix;
+uniform bool isReverseNormal;
 
 out VS_OUT {
     vec3 fragPos;
     vec3 normal;
     vec2 texCoords;
-    vec4 fragLightSpacePos;
 } vs_out;
 
 void main() {
     vs_out.fragPos = vec3(model * vec4(aPos, 1.0));
-    vs_out.normal = transpose(inverse(mat3(model))) * aNormal;
+    if(isReverseNormal) {
+        vs_out.normal = transpose(inverse(mat3(model))) * (-1.0 * aNormal);
+    } else {
+        vs_out.normal = transpose(inverse(mat3(model))) * aNormal;
+    }
     vs_out.texCoords = aTexCoords;
-    vs_out.fragLightSpacePos = lightSpaceMatrix * vec4(vs_out.fragPos, 1.0);
     gl_Position = projection * view * model * vec4(aPos, 1.0);
 }
