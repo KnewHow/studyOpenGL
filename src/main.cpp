@@ -330,6 +330,9 @@ int main(int argc, char *argv[])
     while (!glfwWindowShouldClose(window))
     {
         processInput(window);
+
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
         //lightPos.z = std::sin(glfwGetTime() * 0.5) * 3.0;
 
@@ -347,7 +350,7 @@ int main(int argc, char *argv[])
         
         float z_near = 1.0;
         float z_far = 25.0;
-        glm::mat4 projectMatrix = glm::perspective(glm::radians(90.0f), (float)width/height, z_near, z_far);
+        glm::mat4 projectMatrix = glm::perspective(glm::radians(90.0f), (float)CUBE_SHADOW_WIDTH/CUBE_SHADOW_HEIGHT, z_near, z_far);
         std::vector<glm::mat4> lightSpaceMatrices;
         lightSpaceMatrices.push_back(projectMatrix * glm::lookAt(lightPos, lightPos + glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
         lightSpaceMatrices.push_back(projectMatrix * glm::lookAt(lightPos, lightPos + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
