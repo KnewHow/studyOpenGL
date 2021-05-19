@@ -20,25 +20,46 @@ float calculateShadow(vec3 fragPos, vec3 normal, vec3 lightDir) {
     vec3 fragToLight = fragPos - lightPos;
     float currentDepth = length(fragToLight);
     float closestDepth = texture(shadow_cube, fragToLight).r * z_far;
-    float bias = max(0.05 * (1 - dot(normal, lightDir)), 0.005);
+    //float bias = max(0.05 * (1 - dot(normal, lightDir)), 0.005);
     
     // float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
     // return shadow;
     
     //pcf
+    // float shadow = 0.0;
+    // float offset = 0.1;
+    // float samples = 4.0;
+    // for(float x = -offset; x < offset; x += (2 * offset / samples)) {
+    //     for(float y = -offset; y < offset; y += (2 * offset / samples)) {
+    //         for(float z = -offset; z < offset; z += (2 * offset / samples)) {
+    //             vec3 samplerPos = fragToLight + vec3(x, y, z);
+    //             float samplerDepth = texture(shadow_cube, samplerPos).r * z_far;
+    //             shadow += currentDepth - bias > samplerDepth ? 1.0 : 0.0;
+    //         }
+    //     }   
+    // }
+    // return shadow / (samples * samples * samples);
+
+    // better pcf
+    vec3 sampleOffsetDirections[20] = vec3[](
+        vec3( 1,  1,  1), vec3( 1, -1,  1), vec3(-1, -1,  1), vec3(-1,  1,  1), 
+        vec3( 1,  1, -1), vec3( 1, -1, -1), vec3(-1, -1, -1), vec3(-1,  1, -1),
+        vec3( 1,  1,  0), vec3( 1, -1,  0), vec3(-1, -1,  0), vec3(-1,  1,  0),
+        vec3( 1,  0,  1), vec3(-1,  0,  1), vec3( 1,  0, -1), vec3(-1,  0, -1),
+        vec3( 0,  1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0,  1, -1)
+    );   
     float shadow = 0.0;
-    float offset = 0.1;
-    float samples = 4.0;
-    for(float x = -offset; x < offset; x += (2 * offset / samples)) {
-        for(float y = -offset; y < offset; y += (2 * offset / samples)) {
-            for(float z = -offset; z < offset; z += (2 * offset / samples)) {
-                vec3 samplerPos = fragToLight + vec3(x, y, z);
-                float samplerDepth = texture(shadow_cube, samplerPos).r * z_far;
-                shadow += currentDepth - bias > samplerDepth ? 1.0 : 0.0;
-            }
-        }   
+    int samples = 20;
+    float bias = 0.15;
+    float viewerDistance = length(viewerPos - fragPos);
+    // float diskRadius = 0.05;
+    float diskRadius = (1.0 + (viewerDistance / z_far)) / 25.0;
+    for(int i = 0; i < 20; i++) {
+        vec3 samplerPos = fragToLight + sampleOffsetDirections[i] * diskRadius;
+        float samplerDepth = texture(shadow_cube, samplerPos).r * z_far;
+        shadow += currentDepth - bias > samplerDepth ? 1.0 : 0.0;
     }
-    return shadow / (samples * samples * samples);
+    return shadow / float(samples);
 }
 
 void main() {
