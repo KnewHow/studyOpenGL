@@ -2,74 +2,26 @@
 
 out vec4 frag_Color;
 
-uniform vec3 lightPos;
-uniform vec3 viewerPos;
-uniform float z_far;
-
 uniform sampler2D diffuse_texture;
-uniform samplerCube shadow_cube;
+uniform sampler2D normal_texture;
 
 in VS_OUT {
     vec3 fragPos;
-    vec3 normal;
     vec2 texCoords;
+    vec3 tangentLightPos;
+    vec3 tangentViewerPos;
+    vec3 tangentFragPos;
 } fs_in;
 
 
-float calculateShadow(vec3 fragPos, vec3 normal, vec3 lightDir) {
-    vec3 fragToLight = fragPos - lightPos;
-    float currentDepth = length(fragToLight);
-    float closestDepth = texture(shadow_cube, fragToLight).r * z_far;
-    //float bias = max(0.05 * (1 - dot(normal, lightDir)), 0.005);
-    
-    // float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
-    // return shadow;
-    
-    //pcf
-    // float shadow = 0.0;
-    // float offset = 0.1;
-    // float samples = 4.0;
-    // for(float x = -offset; x < offset; x += (2 * offset / samples)) {
-    //     for(float y = -offset; y < offset; y += (2 * offset / samples)) {
-    //         for(float z = -offset; z < offset; z += (2 * offset / samples)) {
-    //             vec3 samplerPos = fragToLight + vec3(x, y, z);
-    //             float samplerDepth = texture(shadow_cube, samplerPos).r * z_far;
-    //             shadow += currentDepth - bias > samplerDepth ? 1.0 : 0.0;
-    //         }
-    //     }   
-    // }
-    // return shadow / (samples * samples * samples);
-
-    // better pcf
-    vec3 sampleOffsetDirections[20] = vec3[](
-        vec3( 1,  1,  1), vec3( 1, -1,  1), vec3(-1, -1,  1), vec3(-1,  1,  1), 
-        vec3( 1,  1, -1), vec3( 1, -1, -1), vec3(-1, -1, -1), vec3(-1,  1, -1),
-        vec3( 1,  1,  0), vec3( 1, -1,  0), vec3(-1, -1,  0), vec3(-1,  1,  0),
-        vec3( 1,  0,  1), vec3(-1,  0,  1), vec3( 1,  0, -1), vec3(-1,  0, -1),
-        vec3( 0,  1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0,  1, -1)
-    );   
-    float shadow = 0.0;
-    int samples = 20;
-    float bias = 0.15;
-    float viewerDistance = length(viewerPos - fragPos);
-    // float diskRadius = 0.05;
-    float diskRadius = (1.0 + (viewerDistance / z_far)) / 25.0;
-    for(int i = 0; i < 20; i++) {
-        vec3 samplerPos = fragToLight + sampleOffsetDirections[i] * diskRadius;
-        float samplerDepth = texture(shadow_cube, samplerPos).r * z_far;
-        shadow += currentDepth - bias > samplerDepth ? 1.0 : 0.0;
-    }
-    return shadow / float(samples);
-}
-
 void main() {
     vec3 color = texture(diffuse_texture, fs_in.texCoords).rgb;
-    vec3 normal = normalize(fs_in.normal);
+    vec3 normal = texture(normal_texture, fs_in.texCoords).rgb;
     vec3 lightColor = vec3(0.6);
-    vec3 lightDir = normalize(lightPos - fs_in.fragPos);
-    vec3 viewerDir = normalize(viewerPos - fs_in.fragPos);
+    vec3 lightDir = normalize(fs_in.tangentLightPos - fs_in.tangentFragPos);
+    vec3 viewerDir = normalize(fs_in.tangentViewerPos - fs_in.tangentFragPos);
 
-    vec3 ambientColor = 0.3 * lightColor;
+    vec3 ambientColor = 0.15 * lightColor;
 
     float diff = max(dot(normal, lightDir), 0.0);
     vec3 diffColor = lightColor * diff;
@@ -78,7 +30,6 @@ void main() {
     float spec = pow(max(dot(normal, halfVec), 0.0), 64);
     vec3 specColor = lightColor * spec;
 
-    float shadow = calculateShadow(fs_in.fragPos, normal, lightDir);
-    vec3 lightingColor = (ambientColor + (1.0 - shadow) * (specColor + diffColor)) * color;
+    vec3 lightingColor = (ambientColor + specColor + diffColor)) * color
     frag_Color = vec4(lightingColor, 1.0);
 }
