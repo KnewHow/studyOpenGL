@@ -158,7 +158,12 @@ namespace Model
             std::string filepath = dir + "/" + filename;
 
             int width, height, nrComponents;
-            stbi_set_flip_vertically_on_load(true); 
+            if(filepath.find("normal") != std::string::npos) {
+                stbi_set_flip_vertically_on_load(false); 
+            } else {
+                stbi_set_flip_vertically_on_load(true); 
+            }
+            
             unsigned char* data = stbi_load(filepath.c_str(), &width, &height, &nrComponents, 0);
             if(data) {
                 GLenum format;

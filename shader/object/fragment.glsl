@@ -49,7 +49,6 @@ uniform DirectionLight directionLight;
 
 uniform Material material;
 
-uniform vec3 viewerPosition;
 
 in vec3 inFragPosition;
 in vec3 inNormal;

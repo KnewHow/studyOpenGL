@@ -233,14 +233,14 @@ int main(int argc, char *argv[])
         light_shader.use();
         light_shader.setMat4("view", view);
         light_shader.setMat4("projection", projection);
-        glm::vec3 lightPosition = glm::vec3(0);
-        lightPosition.x = (std::sin(glfwGetTime() / 1.5)) * 2.0;
-        lightPosition.y = (std::sin(glfwGetTime() / 2.0)) * 2.5;
-        lightPosition.z = (std::cos(glfwGetTime() / 2.0)) * 3.0;
+        glm::vec3 lightPosition = glm::vec3(1.0, 1.0, 1.0);
+        // lightPosition.x = (std::sin(glfwGetTime() / 1.5)) * 2.0;
+        // lightPosition.y = (std::sin(glfwGetTime() / 2.0)) * 2.5;
+        // lightPosition.z = (std::cos(glfwGetTime() / 2.0)) * 3.0;
         model = glm::translate(model, lightPosition);
         model = glm::scale(model, glm::vec3(0.2));
         light_shader.setMat4("model", model);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        // glDrawArrays(GL_TRIANGLES, 0, 36);
         
 
         model = glm::mat4(1.0);
@@ -250,23 +250,13 @@ int main(int argc, char *argv[])
         model_shader.setMat4("projection", projection);
 
         glm::vec3 lightColor = glm::vec3(1.0);
-        model_shader.setVec3f("directionLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
-        model_shader.setVec3f("directionLight.ambient", lightColor * 0.1f);
+
+        model_shader.setVec3f("directionLight.direction", glm::vec3(-0.2f, -2.0f, 2.3f));
+        model_shader.setVec3f("directionLight.ambient", lightColor * 0.3f);
         model_shader.setVec3f("directionLight.diffuse", lightColor * 0.7f);
         model_shader.setVec3f("directionLight.specular", lightColor * 1.0f);
-    
-
-        model_shader.setVec3f("pointLight.position", lightPosition);
-        model_shader.setVec3f("pointLight.ambient", lightColor * 0.1f);
-        model_shader.setVec3f("pointLight.diffuse", lightColor * 0.7f);
-        model_shader.setVec3f("pointLight.specular", lightColor * 1.0f);
-        model_shader.setFloat("pointLight.constant", 1.0f);
-        model_shader.setFloat("pointLight.linear", 0.09f);
-        model_shader.setFloat("pointLight.quadratic", 0.032f);
         
-        
-        model_shader.setVec3f("viewerPosition", _camera.getPosition());
-        
+        model_shader.setVec3f("viewerPos", _camera.getPosition());
         
         ourModel.draw(model_shader);
     
