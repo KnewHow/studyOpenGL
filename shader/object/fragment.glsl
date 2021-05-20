@@ -17,19 +17,19 @@ in VS_OUT {
 void main() {
     vec3 color = texture(diffuse_texture, fs_in.texCoords).rgb;
     vec3 normal = texture(normal_texture, fs_in.texCoords).rgb;
-    vec3 lightColor = vec3(0.6);
+    normal = normalize(normal * 2.0 - 1.0);
     vec3 lightDir = normalize(fs_in.tangentLightPos - fs_in.tangentFragPos);
     vec3 viewerDir = normalize(fs_in.tangentViewerPos - fs_in.tangentFragPos);
 
-    vec3 ambientColor = 0.15 * lightColor;
+    vec3 ambientColor = 0.1 * color;
 
     float diff = max(dot(normal, lightDir), 0.0);
-    vec3 diffColor = lightColor * diff;
+    vec3 diffColor = color * diff;
 
     vec3 halfVec = normalize(viewerDir + lightDir);
-    float spec = pow(max(dot(normal, halfVec), 0.0), 64);
-    vec3 specColor = lightColor * spec;
+    float spec = pow(max(dot(normal, halfVec), 0.0), 32);
+    vec3 specColor = color * spec * 0.2;
 
-    vec3 lightingColor = (ambientColor + specColor + diffColor)) * color
+    vec3 lightingColor = ambientColor + diffColor + specColor;
     frag_Color = vec4(lightingColor, 1.0);
 }
