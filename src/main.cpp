@@ -297,31 +297,11 @@ int main(int argc, char *argv[])
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, mouse_scroll_callback);
-    
-    Shader cubeShadowShader("../shader/cubeShadow/vertex.glsl", "../shader/cubeShadow/fragment.glsl", "../shader/cubeShadow/geometry.glsl");
-    Shader quadShader("../shader/quad/vertex.glsl", "../shader/quad/fragment.glsl");
-    Shader objShader("../shader/object/vertex.glsl", "../shader/object/fragment.glsl");
-    Texture woodTexture("../res/texture/wood.png");
+    Shader model_shader("../shader/model/vertex.glsl", "../shader/model/fragment.glsl");
+    Shader light_shader("../shader/light/vertex.glsl", "../shader/light/fragment.glsl");
+    Model::Model ourModel("../res/model/backpack/backpack.obj");
 
-    GLuint cubeShadowFrameBuffer, cubeShadowTexture;
-    glGenFramebuffers(1, &cubeShadowFrameBuffer);
-    glGenTextures(1, &cubeShadowTexture);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, cubeShadowTexture);
-    for(int i = 0; i < 6; i++) 
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, CUBE_SHADOW_WIDTH, CUBE_SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-    
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, cubeShadowFrameBuffer);
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, cubeShadowTexture, 0);
-    glDrawBuffer(GL_NONE);
-    glReadBuffer(GL_NONE);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
@@ -348,43 +328,22 @@ int main(int argc, char *argv[])
         glm::mat4 projection;
         projection = glm::perspective(glm::radians(_camera.getZoom()), (float)width/height, 0.1f, 100.0f);
         
-        float z_near = 1.0;
-        float z_far = 25.0;
-        glm::mat4 projectMatrix = glm::perspective(glm::radians(90.0f), (float)CUBE_SHADOW_WIDTH/CUBE_SHADOW_HEIGHT, z_near, z_far);
-        std::vector<glm::mat4> lightSpaceMatrices;
-        lightSpaceMatrices.push_back(projectMatrix * glm::lookAt(lightPos, lightPos + glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
-        lightSpaceMatrices.push_back(projectMatrix * glm::lookAt(lightPos, lightPos + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
-        lightSpaceMatrices.push_back(projectMatrix * glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0)));
-        lightSpaceMatrices.push_back(projectMatrix * glm::lookAt(lightPos, lightPos + glm::vec3(0.0, -1.0, 0.0), glm::vec3(0.0, 0.0, -1.0)));
-        lightSpaceMatrices.push_back(projectMatrix * glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 0.0, 1.0), glm::vec3(0.0, -1.0, 0.0)));
-        lightSpaceMatrices.push_back(projectMatrix * glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 0.0, -1.0), glm::vec3(0.0, -1.0, 0.0)));
+        model_shader.use();
+        model_shader.setMat4("model", model);
+        model_shader.setMat4("view", view);
+        model_shader.setMat4("projection", projection);
 
-        glBindFramebuffer(GL_FRAMEBUFFER, cubeShadowFrameBuffer);
-        glViewport(0, 0, CUBE_SHADOW_WIDTH, CUBE_SHADOW_HEIGHT);
-        glClear(GL_DEPTH_BUFFER_BIT);
-        cubeShadowShader.use();
-        cubeShadowShader.setMat4s("lightSpaceMatrix", lightSpaceMatrices);
-        cubeShadowShader.setFloat("z_far", z_far);
-        cubeShadowShader.setVec3f("lightPos", lightPos);
-        renderScene(cubeShadowShader);
+        glm::vec3 lightColor = glm::vec3(1.0);
 
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glViewport(0, 0, width, height);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        objShader.use();
-        objShader.setMat4("projection", projection);
-        objShader.setMat4("view", view);
-        objShader.setVec3f("lightPos", lightPos);
-        objShader.setVec3f("viewerPos", _camera.getPosition());
-        objShader.setFloat("z_far", z_far);
-        objShader.setInt("diffuse_texture", 0);
-        glActiveTexture(GL_TEXTURE0);
-        woodTexture.bind();
-        objShader.setInt("shadow_cube", 1);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, cubeShadowTexture);
-        renderScene(objShader);
-
+        model_shader.setVec3f("directionLight.direction", glm::vec3(-0.2f, -2.0f, 2.3f));
+        model_shader.setVec3f("directionLight.ambient", lightColor * 0.3f);
+        model_shader.setVec3f("directionLight.diffuse", lightColor * 0.7f);
+        model_shader.setVec3f("directionLight.specular", lightColor * 1.0f);
+        
+        model_shader.setVec3f("viewerPos", _camera.getPosition());
+        
+        ourModel.draw(model_shader);
+    
         glfwSwapBuffers(window);
         glfwPollEvents();
         std::cout << "fps:" << (int)(1 / deltaTime) << std::endl;
