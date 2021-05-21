@@ -17,9 +17,22 @@ in VS_OUT {
 } fs_in;
 
 vec2 calculateDisplacement(vec2 texCoords, vec3 viewerDir) {
-    float height = texture(displacement_texture, texCoords).r;
-    vec2 p = viewerDir.xy / viewerDir.z * (height * height_scale);
-    return texCoords - p;
+    const float minLayers = 8;
+    const float maxLayers = 32;
+    float numLayers = mix(maxLayers, minLayers, abs(dot(vec3(0.0, 0.0, 1.0), viewerDir)));
+    float layerDepth = 1.0 / numLayers;
+    float currentLayerDepth = 0.0;
+    vec2 p = viewerDir.xy / viewerDir.z * height_scale;
+    vec2 deltaTexCoords = p / numLayers;
+    vec2 currentTexCoords = texCoords;
+    float currentDepthMapValue = texture(displacement_texture, currentTexCoords).r;
+    
+    while(currentLayerDepth < currentDepthMapValue) {
+        currentTexCoords -= deltaTexCoords;
+        currentDepthMapValue = texture(displacement_texture, currentTexCoords).r;
+        currentLayerDepth += layerDepth;
+    }
+    return currentTexCoords;
 }
 
 

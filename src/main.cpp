@@ -234,9 +234,9 @@ int main(int argc, char *argv[])
     glfwSetScrollCallback(window, mouse_scroll_callback);
 
     Shader objShader("../shader/object/vertex.glsl", "../shader/object/fragment.glsl");
-    Texture diffuseTexture("../res/texture/bricks2.jpg");
-    Texture normalTexture("../res/texture/bricks2_normal.jpg");
-    Texture displacementTexture("../res/texture/bricks2_disp.jpg");
+    Texture diffuseTexture("../res/texture/wood1.png");
+    Texture normalTexture("../res/texture/toy_box_normal.png");
+    Texture displacementTexture("../res/texture/toy_box_disp.png");
 
     glm::vec3 lightPos(0.5f, 1.0f, 0.3f);
     float height_scale = 0.1;
