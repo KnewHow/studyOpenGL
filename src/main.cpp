@@ -234,9 +234,12 @@ int main(int argc, char *argv[])
     glfwSetScrollCallback(window, mouse_scroll_callback);
 
     Shader objShader("../shader/object/vertex.glsl", "../shader/object/fragment.glsl");
-    Texture diffuseTexture("../res/texture/brickwall.jpg");
-    Texture normalTexture("../res/texture/brickwall_normal.jpg");
+    Texture diffuseTexture("../res/texture/bricks2.jpg");
+    Texture normalTexture("../res/texture/bricks2_normal.jpg");
+    Texture displacementTexture("../res/texture/bricks2_disp.jpg");
+
     glm::vec3 lightPos(0.5f, 1.0f, 0.3f);
+    float height_scale = 0.1;
     while (!glfwWindowShouldClose(window))
     {
         processInput(window);
@@ -263,17 +266,21 @@ int main(int argc, char *argv[])
         objShader.setMat4("model", model);
         objShader.setVec3f("lightPos", lightPos);
         objShader.setVec3f("viewerPos", _camera.getPosition());
+        objShader.setFloat("height_scala", height_scale);
         objShader.setInt("diffuse_texture", 0);
         glActiveTexture(GL_TEXTURE0);
         diffuseTexture.bind();
         objShader.setInt("normal_texture", 1);
         glActiveTexture(GL_TEXTURE1);
         normalTexture.bind();
+        objShader.setInt("displacement_texture", 2);
+        glActiveTexture(GL_TEXTURE2);
+        displacementTexture.bind();
         renderPlane(objShader);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
-        std::cout << "fps:" << (int)(1 / deltaTime) << std::endl;
+        // std::cout << "fps:" << (int)(1 / deltaTime) << std::endl;
     }
 
     glfwDestroyWindow(window);
