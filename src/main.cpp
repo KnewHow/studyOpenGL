@@ -19,8 +19,8 @@
 
 const int width = 1366;
 const int height = 768;
-const int CUBE_SHADOW_WIDTH = 2048;
-const int CUBE_SHADOW_HEIGHT = 2048;
+const int CUBE_FRAME_WIDTH = 2048;
+const int CUBE_FRAME_HEIGHT = 2048;
 
 float mixValue = 0.2;
 
@@ -210,37 +210,9 @@ void renderCube() {
 }
 
 void renderScene(const Shader& shader) {
-    glm::mat4 model = glm::mat4(1.0); // draw cube room
-    model = glm::scale(model, glm::vec3(5.0));
-    shader.setMat4("model", model);
-    glDisable(GL_CULL_FACE);
-    shader.setBool("isReverseNormal", true);
-    renderCube();
-    shader.setBool("isReverseNormal", false);
-    glEnable(GL_CULL_FACE);
-
-    model = glm::mat4(1.0);
-    model = glm::translate(model, glm::vec3(4.0f, -3.5f, 0.0));
-    model = glm::scale(model, glm::vec3(0.5));
-    shader.setMat4("model", model);
-    renderCube();
-
-    model = glm::mat4(1.0);
-    model = glm::translate(model, glm::vec3(2.0, 3.0, 1.0));
-    model = glm::scale(model, glm::vec3(0.75));
-    shader.setMat4("model", model);
-    renderCube();
-
-    model = glm::mat4(1.0);
-    model = glm::translate(model, glm::vec3(-1.5f, 1.0f, 1.5));
-    model = glm::scale(model, glm::vec3(0.5));
-    shader.setMat4("model", model);
-    renderCube();
-
-    model = glm::mat4(1.0);
-    model = glm::translate(model, glm::vec3(-1.5, 2.0, -3.0));
-    model = glm::rotate(model, glm::radians(60.0f), glm::normalize(glm::vec3(1.0, 0.0, 1.0)));
-    model = glm::scale(model, glm::vec3(0.75));
+    glm::mat4 model = glm::mat4(1.0); 
+    model = glm::translate(model, glm::vec3(0.0f, -0.0f, 25.0f));
+    model = glm::scale(model, glm::vec3(2.5f, 2.5f, 27.5f));
     shader.setMat4("model", model);
     renderCube();
 }
@@ -297,25 +269,50 @@ int main(int argc, char *argv[])
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, mouse_scroll_callback);
-    Shader model_shader("../shader/model/vertex.glsl", "../shader/model/fragment.glsl");
-    Shader light_shader("../shader/light/vertex.glsl", "../shader/light/fragment.glsl");
-    Model::Model ourModel("../res/model/backpack/backpack.obj");
+    
+    Shader objShader("../shader/object/vertex.glsl", "../shader/object/fragment.glsl");
+    Shader quadShader("../shader/quad/vertex.glsl", "../shader/quad/fragment.glsl");
+    Texture wood_texture("../res/texture/wood.png");
 
+    std::vector<glm::vec3> lightPositions;
+    lightPositions.push_back(glm::vec3( 0.0f,  0.0f, 49.5f)); // back light
+    lightPositions.push_back(glm::vec3(-1.4f, -1.9f, 9.0f));
+    lightPositions.push_back(glm::vec3( 0.0f, -1.8f, 4.0f));
+    lightPositions.push_back(glm::vec3( 0.8f, -1.7f, 6.0f));
+    // colors
+    std::vector<glm::vec3> lightColors;
+    lightColors.push_back(glm::vec3(200.0f, 200.0f, 200.0f));
+    lightColors.push_back(glm::vec3(0.1f, 0.0f, 0.0f));
+    lightColors.push_back(glm::vec3(0.0f, 0.0f, 0.2f));
+    lightColors.push_back(glm::vec3(0.0f, 0.1f, 0.0f));
+    
+    GLuint cubeFrameBuffer, cubeTexture;
+    glGenFramebuffers(1, &cubeFrameBuffer);
+    glGenTextures(1, &cubeTexture);
+    glBindTexture(GL_TEXTURE_2D, cubeTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, CUBE_FRAME_WIDTH, CUBE_FRAME_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+    GLuint cubeDepth;
+    glGenRenderbuffers(1, &cubeDepth);
+    glBindRenderbuffer(GL_RENDERBUFFER, cubeDepth);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, CUBE_FRAME_WIDTH, CUBE_FRAME_HEIGHT);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, cubeFrameBuffer);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, cubeTexture, 0);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, cubeDepth);
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        std::cout <<  "Framebuffer don't complete!" << std::endl;
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-
-    glm::vec3 lightPos = glm::vec3(0.0);
 
     while (!glfwWindowShouldClose(window))
     {
         processInput(window);
-
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
-        //lightPos.z = std::sin(glfwGetTime() * 0.5) * 3.0;
-
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
@@ -328,26 +325,41 @@ int main(int argc, char *argv[])
         glm::mat4 projection;
         projection = glm::perspective(glm::radians(_camera.getZoom()), (float)width/height, 0.1f, 100.0f);
         
-        model_shader.use();
-        model_shader.setMat4("model", model);
-        model_shader.setMat4("view", view);
-        model_shader.setMat4("projection", projection);
-
-        glm::vec3 lightColor = glm::vec3(1.0);
-
-        model_shader.setVec3f("directionLight.direction", glm::vec3(-0.2f, -2.0f, 2.3f));
-        model_shader.setVec3f("directionLight.ambient", lightColor * 0.3f);
-        model_shader.setVec3f("directionLight.diffuse", lightColor * 0.7f);
-        model_shader.setVec3f("directionLight.specular", lightColor * 1.0f);
+        glBindFramebuffer(GL_FRAMEBUFFER, cubeFrameBuffer);
+        glViewport(0, 0, CUBE_FRAME_WIDTH, CUBE_FRAME_HEIGHT);
         
-        model_shader.setVec3f("viewerPos", _camera.getPosition());
-        
-        ourModel.draw(model_shader);
-    
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        objShader.use();
+        glm::mat4 cubeProjectionMatrix = glm::perspective(glm::radians(_camera.getZoom()), (float)CUBE_FRAME_WIDTH/CUBE_FRAME_HEIGHT, 0.1f, 100.0f);
+        objShader.setMat4("projection", cubeProjectionMatrix);
+        objShader.setMat4("view", view);
+        objShader.setBool("isReverseNormal", true);
+        objShader.setInt("diffuse_texture", 0);
+        glActiveTexture(GL_TEXTURE0);
+        wood_texture.bind();
+        for(int i = 0; i < lightPositions.size(); i++) {
+            objShader.setVec3f("lights[" + std::to_string(i) + "].pos", lightPositions[i]);
+            objShader.setVec3f("lights[" + std::to_string(i) + "].color", lightColors[i]);
+        }
+        renderScene(objShader);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, width, height);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        quadShader.use();
+        quadShader.setFloat("exposure", 0.1);
+        quadShader.setBool("withHRD", true);
+        quadShader.setInt("texture_mask", 1);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, cubeTexture);
+        renderQuad(quadShader);
+
         glfwSwapBuffers(window);
         glfwPollEvents();
-        std::cout << "fps:" << (int)(1 / deltaTime) << std::endl;
     }
+    
+    std::cout << "fps:" << (int)(1 / deltaTime) << std::endl;
 
     glfwDestroyWindow(window);
     glfwTerminate();
