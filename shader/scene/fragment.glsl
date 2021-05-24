@@ -1,6 +1,7 @@
 #version 450 core
 
-out vec4 frag_Color;
+layout(location = 0) out vec4 frag_Color;
+layout(location = 1) out vec4 bright_Color;
 
 struct Light {
     vec3 pos;
@@ -31,5 +32,14 @@ void main() {
         diffColor /= (distance * distance);
         diffuse += diffColor;
     }
-    frag_Color = vec4(ambient + diffuse, 1.0);
+    vec3 result = ambient + diffuse;
+    
+    // dot product with the threshold,then check whether result is enough heigher
+    float brightness = dot(result, vec3(0.2126, 0.7152, 0.0722));
+    if(brightness > 1.0) {
+        bright_Color = vec4(result, 1.0);
+    } else {
+        bright_Color = vec4(0.0, 0.0, 0.0, 1.0);
+    }
+    frag_Color = vec4(result, 1.0);
 }
