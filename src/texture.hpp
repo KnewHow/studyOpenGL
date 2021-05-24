@@ -34,7 +34,7 @@ public:
     /**
      * bind current texture
     */
-    void bind();
+    void bind() const;
     void unbind();
     void freeData();
     void setWrappingMode(GLint wraping);

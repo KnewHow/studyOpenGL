@@ -33,7 +33,7 @@ Texture::~Texture() {
     freeData();
 }
 
-void Texture::bind() {
+void Texture::bind() const {
     if(ID != 0) {
         glBindTexture(GL_TEXTURE_2D, ID);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrappingMode);
