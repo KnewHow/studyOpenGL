@@ -19,8 +19,8 @@
 
 const int width = 1366;
 const int height = 768;
-const int TEXTURE_WIDTH = 2048;
-const int TEXTURE_HEIGHT = 2048;
+const int TEXTURE_WIDTH = 1366;
+const int TEXTURE_HEIGHT = 768;
 
 float mixValue = 0.2;
 
@@ -326,7 +326,7 @@ int main(int argc, char *argv[])
     GLuint sceneTextures[2];
     glGenTextures(2, sceneTextures);
 
-    for(int i = 0; i < 2; i++) { // create two texture to record original buffer and bright buffer
+    for(GLuint i = 0; i < 2; i++) { // create two texture to record original buffer and bright buffer
         glBindTexture(GL_TEXTURE_2D, sceneTextures[i]);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, TEXTURE_WIDTH, TEXTURE_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -340,11 +340,11 @@ int main(int argc, char *argv[])
     GLuint depthRBO;
     glGenRenderbuffers(1, &depthRBO);
     glBindRenderbuffer(GL_RENDERBUFFER, depthRBO);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENTS, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, TEXTURE_WIDTH, TEXTURE_HEIGHT);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRBO);
 
     // tell openGL we use two buffer to render
-    GLuint attachments[2] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT2};
+    GLuint attachments[2] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
     glDrawBuffers(2, attachments);
     
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
@@ -370,6 +370,7 @@ int main(int argc, char *argv[])
             std::cerr << "pingpong buffer don't complete!" << std::endl;
         }
     }
+    
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     // lights position and colors
@@ -426,14 +427,53 @@ int main(int argc, char *argv[])
             sceneShader.setVec3f("lights[" + std::to_string(i) + "].color", lightColors[i]);
         }
         renderScene(sceneShader, cubeTexture, floorTexture);
+        
+        lightShader.use();
+        lightShader.setMat4("view", view);
+        lightShader.setMat4("projection", projection);
+        for(int i = 0; i < lightPositions.size(); i++) {
+            model = glm::mat4(1.0);
+            model = glm::translate(model, glm::vec3(lightPositions[i]));
+            model = glm::scale(model, glm::vec3(0.25f));
+            lightShader.setMat4("model", model);
+            lightShader.setVec3f("lightColor", lightColors[i]);
+            renderCube();
+        }
 
-        // TODO blur
+
+        blurShader.use();
+        bool horizontal = true, first_iteration = true; // blur with two pass algorithms
+        unsigned int amount = 11;
+        for(unsigned int i = 0; i < amount; i++) { // because of some bugs, we must loop 11 time, so we can get values of 10th texture
+            glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBOs[horizontal]);
+            glViewport(0, 0, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+            blurShader.setBool("isHorizontal", horizontal);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, first_iteration ? sceneTextures[1] : pingpongTextures[!horizontal]);
+            renderQuad(blurShader);
+            horizontal = !horizontal;
+            if(first_iteration)
+                first_iteration = false;
+        }
+
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0, 0, width, height);
+        resultShader.use();
+        resultShader.setBool("withBloom", true);
+        resultShader.setFloat("exposure", 1.0);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, sceneTextures[0]);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, pingpongTextures[0]);
+        renderQuad(resultShader);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
+        std::cout << "fps:" << (int)(1 / deltaTime) << std::endl;
     }
     
-    std::cout << "fps:" << (int)(1 / deltaTime) << std::endl;
 
     glfwDestroyWindow(window);
     glfwTerminate();
