@@ -10,13 +10,13 @@ struct Light {
     float quadratic;
 };
 
-const int NR_LIGHTS = 32;
-uniform Light lights[NR_LIGHTS];
+uniform Light light;
 uniform vec3 viewerPos;
 
 uniform sampler2D texture_pos;
 uniform sampler2D texture_normal;
 uniform sampler2D texture_albedo_spec;
+uniform sampler2D texture_SSAO;
 
 
 in vec2 texcoords;
@@ -24,26 +24,24 @@ in vec2 texcoords;
 void main() {
     vec3 fragPos = texture(texture_pos, texcoords).rgb;
     vec3 normal = normalize(texture(texture_normal, texcoords).rgb);
-    vec4 albedoSpec = texture(texture_albedo_spec, texcoords);
-    vec3 color = albedoSpec.rgb;
-    float specularIntension = albedoSpec.a;
+    vec4 color = texture(texture_albedo_spec, texcoords).rgb;
+    float ambientOcclusion = texture(texture_SSAO, texcoords).r;
 
-    vec3 result = 0.1 * color;
-    for(int i = 0; i < NR_LIGHTS; i++) {
+    vec3 ambient = vec3(0.3 * color * ambientOcclusion);
 
-        vec3 lightDir = normalize(lights[i].pos - fragPos);
-        float diff = max(dot(lightDir, normal), 0.0);
-        vec3 diffuse = diff * color * lights[i].color;
+    vec3 lightDir = normalize(light.pos - fragPos);
+    float diff = max(dot(lightDir, normal), 0.0);
+    vec3 diffuse = diff * color * light.color;
 
-        vec3 viewerDir = normalize(viewerPos - fragPos);
-        vec3 halfVec = normalize(lightDir + viewerDir);
-        float spec = pow(max(dot(halfVec, normal), 0.0), 32.0);
-        vec3 specular = spec * specularIntension * lights[i].color;
+    vec3 viewerDir = normalize(viewerPos - fragPos);
+    vec3 halfVec = normalize(lightDir + viewerDir);
+    float spec = pow(max(dot(halfVec, normal), 0.0), 32.0);
+    vec3 specular = spec * light.color;
 
-        float distance = length(fragPos - lights[i].pos);
-        float attenuation = 1.0 / (1.0 + lights[i].linear * distance + lights[i].quadratic * distance * distance);
-        result += (diffuse + specular) * attenuation;
-    }
+    float distance = length(fragPos - light.pos);
+    float attenuation = 1.0 / (1.0 + light.linear * distance + light.quadratic * distance * distance);
+    vec3 result = (diffuse + specular) * attenuation;
+    result += ambient;
     frag_Color = vec4(result, 1.0);
 
 }
