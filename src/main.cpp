@@ -311,49 +311,45 @@ int main(int argc, char *argv[])
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, mouse_scroll_callback);
 
-    Shader gBufferShader("../shader/GBufferPass/vertex.glsl", "../shader/GBufferPass/fragment.glsl"); 
-    Shader lightPassShader("../shader/lightPass/vertex.glsl", "../shader/lightPass/fragment.glsl"); 
-    Shader lightShader("../shader/light/vertex.glsl", "../shader/light/fragment.glsl");
-    Model::Model ourModel("../res/model/backpack/backpack.obj");
-
-    std::vector<glm::vec3> objectPositions;
-    objectPositions.push_back(glm::vec3(-3.0,  -0.5, -3.0));
-    objectPositions.push_back(glm::vec3( 0.0,  -0.5, -3.0));
-    objectPositions.push_back(glm::vec3( 3.0,  -0.5, -3.0));
-    objectPositions.push_back(glm::vec3(-3.0,  -0.5,  0.0));
-    objectPositions.push_back(glm::vec3( 0.0,  -0.5,  0.0));
-    objectPositions.push_back(glm::vec3( 3.0,  -0.5,  0.0));
-    objectPositions.push_back(glm::vec3(-3.0,  -0.5,  3.0));
-    objectPositions.push_back(glm::vec3( 0.0,  -0.5,  3.0));
-    objectPositions.push_back(glm::vec3( 3.0,  -0.5,  3.0));
+    Shader gBufferShader("../shader/GBufferPass/vertex.glsl", "../shader/GBufferPass/fragment.glsl");
+    Shader SSAOShader("../shader/SSAO/vertex.glsl", "../shader/SSAO/fragment.glsl");
+    Shader SSAOBlurShader("../shader/SSAOBlur/vertex.glsl", "../shader/SSAOBlur/fragment.glsl");
+    Shader lightPassShader("../shader/lightPass/vertex.glsl", "../shader/lightPass/fragment.glsl");
+    Model::Model outModel("../res/model/backpack.obj");
 
     GLuint gBufferFBO;
     glGenFramebuffers(1, &gBufferFBO);
     glBindFramebuffer(GL_FRAMEBUFFER, gBufferFBO);
-
-    GLuint posTex, normalTex, albedoSpecTex;
+    
+    GLuint posTex, normalTex, albedoTex;
     glGenTextures(1, &posTex);
     glBindTexture(GL_TEXTURE_2D, posTex);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, TEXTURE_WIDTH, TEXTURE_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, posTex, 0);
-    
+
     glGenTextures(1, &normalTex);
     glBindTexture(GL_TEXTURE_2D, normalTex);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, TEXTURE_WIDTH, TEXTURE_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, normalTex, 0);
-    
-    glGenTextures(1, &albedoSpecTex);
-    glBindTexture(GL_TEXTURE_2D, albedoSpecTex);
+
+    glGenTextures(1, &albedoTex);
+    glBindTexture(GL_TEXTURE_2D, albedoTex);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, TEXTURE_WIDTH, TEXTURE_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, albedoSpecTex, 0);
-    
-    GLuint attachments[3] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, albedoTex, 0);
+
+    GLuint attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
     glDrawBuffers(3, attachments);
 
     GLuint depthRBO;
@@ -361,37 +357,40 @@ int main(int argc, char *argv[])
     glBindRenderbuffer(GL_RENDERBUFFER, depthRBO);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, TEXTURE_WIDTH, TEXTURE_HEIGHT);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRBO);
-
-    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        std::cerr << "gBuffer frame don't complete!" << std::endl;
-    }
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        std::cout << "GBuffer Framebuffer not complete!" << std::endl;
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    const unsigned int NR_LIGHTS = 32;
-    std::vector<glm::vec3> lightPositions;
-    std::vector<glm::vec3> lightColors;
-    srand(13);
-    for (unsigned int i = 0; i < NR_LIGHTS; i++)
-    {
-        // calculate slightly random offsets
-        float xPos = ((rand() % 100) / 100.0) * 6.0 - 3.0;
-        float yPos = ((rand() % 100) / 100.0) * 6.0 - 4.0;
-        float zPos = ((rand() % 100) / 100.0) * 6.0 - 3.0;
-        lightPositions.push_back(glm::vec3(xPos, yPos, zPos));
-        // also calculate random color
-        float rColor = ((rand() % 100) / 200.0f) + 0.5; // between 0.5 and 1.0
-        float gColor = ((rand() % 100) / 200.0f) + 0.5; // between 0.5 and 1.0
-        float bColor = ((rand() % 100) / 200.0f) + 0.5; // between 0.5 and 1.0
-        lightColors.push_back(glm::vec3(rColor, gColor, bColor));
-    }
+    GLuint SSAOFBO, SSAOBlurFBO;
+    GLuint SSAOTex, SSAOBlurTex;
+    glGenFramebuffers(1, &SSAOFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, SSAOFBO);
+    glGenTextures(1, &SSAOTex);
+    glBindTexture(GL_TEXTURE_2D, SSAOTex);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, TEXTURE_WIDTH, TEXTURE_HEIGHT, 0, GL_RED, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, SSAOTex, 0);
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        std::cout << "SSAO Framebuffer not complete!" << std::endl;
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+    glGenFramebuffers(1, &SSAOBlurFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, SSAOBlurFBO);
+    glGenTextures(1, &SSAOBlurTex);
+    glBindTexture(GL_TEXTURE_2D, SSAOBlurTex);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, TEXTURE_WIDTH, TEXTURE_HEIGHT, 0, GL_RED, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, SSAOBlurTex, 0);
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        std::cout << "SSAO blur Framebuffer not complete!" << std::endl;
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    
     glEnable(GL_DEPTH_TEST);
 
-    lightPassShader.use();
-    lightPassShader.setInt("texture_pos", 0);
-    lightPassShader.setInt("texture_normal", 1);
-    lightPassShader.setInt("texture_albedo_spec", 2);
 
+  
     while (!glfwWindowShouldClose(window))
     {
         processInput(window);
@@ -411,63 +410,12 @@ int main(int argc, char *argv[])
         glm::mat4 projection;
         projection = glm::perspective(glm::radians(_camera.getZoom()), (float)TEXTURE_WIDTH/TEXTURE_HEIGHT, 0.1f, 100.0f);
         
-        glBindFramebuffer(GL_FRAMEBUFFER, gBufferFBO);
-        glViewport(0, 0, TEXTURE_WIDTH, TEXTURE_HEIGHT);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        gBufferShader.use();
-        gBufferShader.setMat4("view", view);
-        gBufferShader.setMat4("projection", projection);
-        for(int i = 0; i < objectPositions.size(); i++) {
-            model = glm::mat4(1.0);
-            model = glm::translate(model, objectPositions[i]);
-            model = glm::scale(model, glm::vec3(0.5));
-            gBufferShader.setMat4("model", model);
-            ourModel.draw(gBufferShader);
-        }
-
-        projection = glm::perspective(glm::radians(_camera.getZoom()), (float)width/height, 0.1f, 100.0f);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glViewport(0, 0, width, height);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        lightPassShader.use();
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, posTex);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, normalTex);
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, albedoSpecTex);
-        lightPassShader.setVec3f("viewerPos", _camera.getPosition());
-        const float linear = 0.7;
-        const float quadratic = 1.8;
-        for(int i = 0; i < lightPositions.size(); i++) {
-            lightPassShader.setVec3f("lights[" + std::to_string(i) + "].pos", lightPositions[i]);
-            lightPassShader.setVec3f("lights[" + std::to_string(i) + "].color", lightColors[i]);
-            lightPassShader.setFloat("lights[" + std::to_string(i) + "].linear", linear);
-            lightPassShader.setFloat("lights[" + std::to_string(i) + "].quadratic", quadratic);
-        }
-        renderQuad(lightPassShader);
-
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, gBufferFBO);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-        glBlitFramebuffer(0, 0, TEXTURE_WIDTH, TEXTURE_HEIGHT, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-        lightShader.use();
-        lightShader.setMat4("view", view);
-        lightShader.setMat4("projection", projection);
-        for(int i = 0; i < lightPositions.size(); i++) {
-            model = glm::mat4(1.0);
-            model = glm::translate(model, lightPositions[i]);
-            model = glm::scale(model, glm::vec3(0.125));
-            lightShader.setMat4("model", model);
-            lightShader.setVec3f("lightColor", lightColors[i]);
-            renderCube();
-        }    
-
-
         
         glfwSwapBuffers(window);
         glfwPollEvents();
-        std::cout << "fps:" << (int)(1 / deltaTime) << std::endl;
     }
+    
+    std::cout << "fps:" << (int)(1 / deltaTime) << std::endl;
     
 
     glfwDestroyWindow(window);
