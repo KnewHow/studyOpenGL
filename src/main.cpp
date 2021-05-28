@@ -322,6 +322,7 @@ int main(int argc, char *argv[])
     Shader SSAOBlurShader("../shader/SSAOBlur/vertex.glsl", "../shader/SSAOBlur/fragment.glsl");
     Shader lightPassShader("../shader/lightPass/vertex.glsl", "../shader/lightPass/fragment.glsl");
     Model::Model outModel("../res/model/backpack/backpack.obj");
+    Texture wood_texture("../res/texture/wood.png");
 
     GLuint gBufferFBO;
     glGenFramebuffers(1, &gBufferFBO);
@@ -472,6 +473,9 @@ int main(int argc, char *argv[])
         model = glm::scale(model, glm::vec3(7.5f, 7.5f, 7.5f));
         gBufferShader.setMat4("model", model);
         gBufferShader.setBool("isInvertedNormals", true);
+        gBufferShader.setInt("texture_diffuse1", 0);
+        glActiveTexture(GL_TEXTURE0);
+        wood_texture.bind();
         renderCube();
 
         gBufferShader.setBool("isInvertedNormals", false);

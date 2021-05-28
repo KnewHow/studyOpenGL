@@ -15,5 +15,5 @@ in VS_OUT {
 void main() {
     gPos = fs_in.viewPos;
     gNormal = normalize(fs_in.normal);
-    gAlbedo = vec4(0.95);
+    gAlbedo = texture(texture_diffuse1, fs_in.texcoords);
 }
