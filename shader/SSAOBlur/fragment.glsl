@@ -12,9 +12,9 @@ void main() {
     for(int x = -2; x < 2; x++) {
         for(int y = -2; y < 2; y++) {
             vec2 offset = vec2(float(x), float(y)) * texelSize;
-            result += texture(texture_SSAO, texcoords + offset);
+            result += texture(texture_SSAO, texcoords + offset).r;
         }
     }
-    result = result / (4.0 * 4.0)
+    result = result / (4.0 * 4.0);
     frag_Color = result;
 }

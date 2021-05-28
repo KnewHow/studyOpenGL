@@ -24,7 +24,7 @@ in vec2 texcoords;
 void main() {
     vec3 fragPos = texture(texture_pos, texcoords).rgb;
     vec3 normal = normalize(texture(texture_normal, texcoords).rgb);
-    vec4 color = texture(texture_albedo_spec, texcoords).rgb;
+    vec3 color = texture(texture_albedo_spec, texcoords).rgb;
     float ambientOcclusion = texture(texture_SSAO, texcoords).r;
 
     vec3 ambient = vec3(0.3 * color * ambientOcclusion);
