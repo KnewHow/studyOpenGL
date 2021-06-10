@@ -1,6 +1,6 @@
 #version 450 core
 
-out frag_Color;
+out vec4 frag_Color;
 
 uniform sampler2D albedo_map;
 uniform sampler2D normal_map;
@@ -11,14 +11,14 @@ uniform sampler2D ao_map;
 uniform vec3 lightPostions[4];
 uniform vec3 lightColors[4];
 
-uniform viewerPos;
+uniform vec3 viewerPos;
 
 const float PI = 3.14159265359;
 
 in VS_OUT {
     vec3 worldPos;
     vec3 normal;
-    vec3 texcoords;
+    vec2 texcoords;
 } fs_in;
 
 vec3 getNormalFromMap() {
@@ -75,7 +75,7 @@ void main() {
     vec3 albedo = pow(texture(albedo_map, fs_in.texcoords).rgb, vec3(2.2));
     float metallic = texture(metallic_map, fs_in.texcoords).r;
     float roughness = texture(roughness_map, fs_in.texcoords).r;
-    float ao = texture(ao_map, fs_in.roughness);
+    float ao = texture(ao_map, fs_in.texcoords).r;
 
     vec3 N = getNormalFromMap();
     vec3 V = normalize(viewerPos - fs_in.worldPos);
