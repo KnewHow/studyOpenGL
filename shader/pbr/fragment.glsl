@@ -72,7 +72,7 @@ vec3 fresnelSchlick(vec3 H, vec3 V, vec3 F0) {
 }
 
 void main() {
-    vec3 albedo = pow(texture(albedo_map, fs_in.texcoords).rgb, vec3(2.2));
+    vec3 albedo = texture(albedo_map, fs_in.texcoords).rgb; // do gamma in load texture
     float metallic = texture(metallic_map, fs_in.texcoords).r;
     float roughness = texture(roughness_map, fs_in.texcoords).r;
     float ao = texture(ao_map, fs_in.texcoords).r;
