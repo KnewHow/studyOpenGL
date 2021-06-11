@@ -7,6 +7,7 @@ uniform sampler2D normal_map;
 uniform sampler2D metallic_map;
 uniform sampler2D roughness_map;
 uniform sampler2D ao_map;
+uniform samplerCube irradiance_map;
 
 uniform vec3 lightPostions[4];
 uniform vec3 lightColors[4];
@@ -67,8 +68,8 @@ float geometrySmith(vec3 N, vec3 V, vec3 L, float roughness) {
     return ggx1 * ggx2;
 }
 
-vec3 fresnelSchlick(vec3 H, vec3 V, vec3 F0) {
-    return F0 + (1 - F0) * pow(max(1 - max(dot(H, V), 0.0), 0.0), 5.0);
+vec3 fresnelSchlick(float cosTheta, vec3 F0) {
+    return F0 + (1 - F0) * pow(max(1 - cosTheta, 0.0), 5.0);
 }
 
 void main() {
@@ -92,7 +93,7 @@ void main() {
 
         float NDF = NDFGGX(N, H, roughness);
         float G = geometrySmith(N, V, L, roughness);
-        vec3 F = fresnelSchlick(H, V, F0);
+        vec3 F = fresnelSchlick(max(dot(V, H), 0.0), F0);
        
         vec3  numerator = NDF * G * F;
         float denominator =  4 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.001;
@@ -107,7 +108,13 @@ void main() {
         Lo += (Kd * albedo / PI + specular) * radiance * NdotL;
     }
 
-    vec3 ambient = vec3(0.03) * albedo * ao;
+    vec3 Ks = fresnelSchlick(max(dot(N, V), 0.0), F0);
+    vec3 Kd = 1.0 - Ks;
+    Kd *= (1 - metallic);
+    vec3 irradiance = texture(irradiance_map, N).rgb;
+    vec3 diffuse = irradiance * albedo;
+    vec3 ambient = Kd * diffuse * ao;
+
     vec3 color = Lo + ambient;
     color = color / (color + vec3(1.0));
     color = pow(color, vec3(1.0 / 2.2));

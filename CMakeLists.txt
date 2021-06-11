@@ -11,6 +11,8 @@ file(GLOB SOURCES
     "${SRC_DIR}/*.cpp"
     "${SRC_DIR}/model/*.hpp"
     "${SRC_DIR}/model/*.cpp"
+    "${SRC_DIR}/texture/*.hpp"
+    "${SRC_DIR}/texture/*.cpp"
 )
 
 
