@@ -595,8 +595,8 @@ int main(int argc, char *argv[])
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-    
     std::cout << "fps:" << (int)(1 / deltaTime) << std::endl;
+    
     
     
 
