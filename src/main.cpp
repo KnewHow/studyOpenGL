@@ -77,7 +77,7 @@ namespace
             DLOG(INFO) << "press esc!";
             glfwSetWindowShouldClose(window, true);
         } else if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-            DLOG(INFO) << "press down!";
+            //DLOG(INFO) << "press down!";
             mixValue -= 0.001;
             if(mixValue < 0.0f) {
                 mixValue = 0.0f;
