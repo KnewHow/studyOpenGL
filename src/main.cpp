@@ -4,7 +4,10 @@
 #include <stdio.h>
 #include <iostream>
 #include <cmath>
+#include <filesystem>
 #include <vector>
+#include "core.hpp"
+
 
 #include "vec3.hpp"
 #include "matrix.hpp"
@@ -17,8 +20,8 @@
 #include "model/model.hpp"
 //#include "debugGL.hpp"
 
-const int width = 1366;
-const int height = 768;
+const int width = 1920;
+const int height = 1080;
 
 float mixValue = 0.2;
 
@@ -71,8 +74,10 @@ namespace
     void processInput(GLFWwindow* window) {
         const float cameraSpeed = 2.5 * deltaTime;
         if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+            DLOG(INFO) << "press esc!";
             glfwSetWindowShouldClose(window, true);
         } else if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+            DLOG(INFO) << "press down!";
             mixValue -= 0.001;
             if(mixValue < 0.0f) {
                 mixValue = 0.0f;
@@ -132,6 +137,10 @@ namespace
 
 int main(int argc, char *argv[])
 {
+    google::InitGoogleLogging(argv[0]);
+    FLAGS_alsologtostderr = true;
+    std::string currentPath = std::filesystem::current_path().string();
+    DLOG(INFO) << "current path: " << currentPath;
     glfwSetErrorCallback(errorCallback);
 
     GLFWwindow *window = initialize();
@@ -141,7 +150,7 @@ int main(int argc, char *argv[])
     }
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, mouse_scroll_callback);
     
