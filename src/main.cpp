@@ -18,8 +18,8 @@
 #include "model/model.hpp"
 //#include "debugGL.hpp"
 
-const int width = 1366;
-const int height = 768;
+const int width = 1920;
+const int height = 1080;
 const int TEXTURE_WIDTH = 1366;
 const int TEXTURE_HEIGHT = 768;
 
