@@ -17,10 +17,10 @@
 #include "model/model.hpp"
 //#include "debugGL.hpp"
 
-const int width = 1366;
-const int height = 768;
-const int depth_mapping_width = 2048;
-const int depth_mapping_height = 2048;
+const int width = 3840;
+const int height = 2160;
+const int depth_mapping_width = 4096;
+const int depth_mapping_height = 4096;
 
 float mixValue = 0.2;
 
