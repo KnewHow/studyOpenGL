@@ -17,10 +17,10 @@
 #include "model/model.hpp"
 //#include "debugGL.hpp"
 
-const int width = 1366;
-const int height = 768;
-const int depth_mapping_width = 2048;
-const int depth_mapping_height = 2048;
+const int width = 1920;
+const int height = 1080;
+const int depth_mapping_width = 4096;
+const int depth_mapping_height = 4096;
 
 float mixValue = 0.2;
 
@@ -317,6 +317,7 @@ void renderQuad(const Shader& shader) {
 
 int main(int argc, char *argv[])
 {
+    //google::InitGoogleLogging(argv[0]);
     glfwSetErrorCallback(errorCallback);
 
     GLFWwindow *window = initialize();
