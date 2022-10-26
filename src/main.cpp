@@ -450,6 +450,7 @@ int main(int argc, char *argv[])
         glBindFramebuffer(GL_READ_FRAMEBUFFER, gBufferFBO);
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
         glBlitFramebuffer(0, 0, TEXTURE_WIDTH, TEXTURE_HEIGHT, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
         lightShader.use();
         lightShader.setMat4("view", view);
         lightShader.setMat4("projection", projection);
