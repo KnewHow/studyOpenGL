@@ -7,8 +7,10 @@ set(LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib")
 set(SOURCES "${SRC_DIR}/main.cpp")
 
 file(GLOB SOURCES
-    "${SRC_DIR}/*.h"
+    "${SRC_DIR}/*.hpp"
     "${SRC_DIR}/*.cpp"
+    "${SRC_DIR}/model/*.hpp"
+    "${SRC_DIR}/model/*.cpp"
 )
 
 
@@ -42,3 +44,23 @@ target_include_directories(${PROJECT_NAME} PRIVATE "${STB_DIR}")
 # glm
 set(GLM_DIR "${LIB_DIR}/glm")
 target_include_directories(${PROJECT_NAME} PRIVATE "${GLM_DIR}/glm")
+
+# assimp
+set(ASSIMP_DIR "${LIB_DIR}/assimp")
+target_include_directories(${PROJECT_NAME} PRIVATE "${ASSIMP_DIR}/include")
+add_subdirectory("${ASSIMP_DIR}")
+target_link_libraries(${PROJECT_NAME} "assimp" "${CMAKE_DL_LIBS}")
+
+# glog
+SET(WITH_GFLAGS OFF CACHE BOOL "Use gflags")
+SET(BUILD_SHARED_LIBS OFF CACHE BOOL " " FORCE)
+IF(WIN32)
+  ADD_DEFINITIONS( -D GOOGLE_GLOG_DLL_DECL= )
+ENDIF()
+add_subdirectory(lib/glog)
+SET_PROPERTY(TARGET glog logging_unittest demangle_unittest utilities_unittest stl_logging_unittest PROPERTY FOLDER "ext")
+INCLUDE_DIRECTORIES (
+  lib/glog/src
+  ${CMAKE_BINARY_DIR}/lib/glog
+)
+target_link_libraries(${PROJECT_NAME} "glog" "${CMAKE_DL_LIBS}")
